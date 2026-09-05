@@ -1,0 +1,22 @@
+/* src/assets/layout.css
+ * ITCSS layer 2 (layout): cosmetic-free page scaffolding — containers and
+ * width/overflow patterns only. No colors, typography, or paint belong here.
+ *
+ * See REFACTOR_PLAN.md §Phase 8 for the layering rationale.
+ */
+
+@layer layout {
+
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 16px;
+}
+
+} /* end @layer layout */

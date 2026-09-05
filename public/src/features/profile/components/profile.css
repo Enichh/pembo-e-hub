@@ -1,0 +1,175 @@
+/* features/profile/components/profile.css
+ * Presentation for the profile slice. Mirrors the landing/dashboard design
+ * language: soft radius, gradient accents, hover lift. Reuses the shared
+ * .card/.form-group/.btn classes from components.css where possible. */
+
+:root {
+    --prof-accent: #1D64F2;
+    --prof-accent-dark: #1854d4;
+    --prof-accent-soft: #eff6ff;
+    --prof-text: #0f172a;
+    --prof-muted: #64748b;
+    --prof-border: #e2e8f0;
+    --prof-card: #ffffff;
+    --prof-success: #16a34a;
+    --prof-danger: #dc2626;
+}
+
+.prof { display: flex; flex-direction: column; gap: 14px; }
+
+/* The profile cards render inside #prof-content (populated by profile.js).
+   Mobile stacks them; desktop lays them side-by-side so the full form fits the
+   viewport without scrolling to reach Save Changes. */
+#prof-content { display: flex; flex-direction: column; gap: 14px; }
+@media (min-width: 720px) {
+    #prof-content { flex-direction: row; align-items: flex-start; }
+    #prof-content > .prof-card:first-child { flex: 0 0 300px; }
+    #prof-content > .prof-card:last-child { flex: 1 1 auto; min-width: 0; }
+    .prof-form-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.prof-intro h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--prof-text);
+    margin-bottom: 2px;
+}
+.prof-intro p { color: var(--prof-muted); font-size: 0.88rem; margin: 0; }
+
+.prof-card {
+    background: var(--prof-card);
+    border: 1px solid var(--prof-border);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.prof-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.prof-section-head h2 {
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--prof-text);
+    margin: 0;
+}
+
+/* ---------- Read-only summary (account identity) ---------- */
+.prof-id-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+}
+.prof-avatar {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--prof-accent), var(--prof-accent-dark));
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.prof-avatar-sub { color: var(--prof-muted); font-size: 0.82rem; margin-top: 1px; }
+
+/* Empty/loading state (self-contained; dashboard.css is not loaded here). */
+.state-box {
+    text-align: center;
+    padding: 26px 20px;
+    background: var(--prof-card);
+    border: 1px dashed var(--prof-border);
+    border-radius: 12px;
+    color: var(--prof-text);
+}
+.state-box-title { font-weight: 700; margin-bottom: 4px; }
+.state-box-sub { font-size: 0.88rem; color: var(--prof-muted); }
+.prof-avatar-name { font-weight: 800; font-size: 1rem; color: var(--prof-text); }
+
+.prof-field {
+    display: grid;
+    gap: 2px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--prof-border);
+}
+.prof-field:last-child { border-bottom: none; }
+.prof-field-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--prof-muted);
+}
+.prof-field-value { font-size: 0.95rem; color: var(--prof-text); font-weight: 600; }
+.prof-field-value.is-empty { color: var(--prof-muted); font-weight: 500; font-style: italic; }
+
+/* ---------- Editable form ---------- */
+.prof-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px 16px;
+}
+/* Compact the shared .form-group (from components.css) inside the profile form. */
+.prof-form-grid .form-group { margin-bottom: 0; }
+.prof-form-grid .full { grid-column: 1 / -1; }
+
+@media (min-width: 640px) {
+    .prof-form-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Keep the birthdate calendar reasonably sized even though its cell spans full width. */
+.prof-birthdate-group .bd-calendar,
+.prof-birthdate-group .bd-cal-body {
+    max-width: 360px;
+}
+
+
+
+.prof-hint { font-size: 0.78rem; color: var(--prof-muted); margin-top: 6px; }
+.prof-hint.prof-hint-error { color: var(--prof-danger); font-weight: 500; }
+
+.prof-submit {
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--prof-accent), var(--prof-accent-dark));
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(29, 100, 242, 0.24);
+    transition: transform 0.12s, box-shadow 0.15s;
+}
+.prof-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(29, 100, 242, 0.32);
+}
+.prof-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.prof-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+.prof-actions .btn { flex: 1; }
+
+/* Inline alert used for save feedback. */
+.prof-alert {
+    display: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-top: 12px;
+}
+.prof-alert.is-visible { display: block; }
+.prof-alert.is-success { background: #dcfce7; color: #166534; }
+.prof-alert.is-error { background: #fef2f2; color: #b91c1c; }

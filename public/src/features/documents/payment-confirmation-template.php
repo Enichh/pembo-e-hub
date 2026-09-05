@@ -1,0 +1,36 @@
+<!-- features/documents/payment-confirmation-template.php
+     Native PHP template: payment recorded for a document request.
+     Rendered via NotificationService. Variables: firstName, trackingNumber,
+     documentName, referenceNumber, amountPaid, year.
+     NOTE: avoids the phrase "official receipt". -->
+
+<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #f8fafc; color: #0f172a; line-height: 1.6;">
+    <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 28px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <p style="margin: 0; font-weight: 700; color: #1e40af; font-size: 18px;">Pembo e-Hub</p>
+            <p style="margin: 4px 0 0; color: #64748b; font-size: 13px;">Barangay Pembo Services Portal</p>
+        </div>
+
+        <h2 style="margin: 0 0 12px; font-size: 20px; color: #166534;">Payment confirmed</h2>
+        <p style="margin: 0 0 20px; color: #475569; font-size: 14px;">
+            Hello <?= htmlspecialchars($firstName) ?>, we have recorded your payment for the request below.
+        </p>
+
+        <table style="width: 100%; border-collapse: collapse; margin: 0 0 20px; font-size: 14px; color: #334155;">
+            <tr><td style="padding: 6px 0; color: #64748b;">Tracking number</td><td style="padding: 6px 0; text-align: right; font-weight: 600;"><?= htmlspecialchars($trackingNumber) ?></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b;">Document</td><td style="padding: 6px 0; text-align: right; font-weight: 600;"><?= htmlspecialchars($documentName) ?></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b;">Payment reference</td><td style="padding: 6px 0; text-align: right; font-weight: 600;"><?= htmlspecialchars($referenceNumber) ?></td></tr>
+            <tr><td style="padding: 6px 0; color: #64748b;">Amount paid</td><td style="padding: 6px 0; text-align: right; font-weight: 700;"><?= htmlspecialchars($amountPaid) ?></td></tr>
+        </table>
+
+        <p style="margin: 0 0 20px; color: #475569; font-size: 14px;">
+            You will be notified when your document is ready for pickup.
+        </p>
+
+        <div style="border-top: 1px solid #e2e8f0; margin-top: 20px; padding-top: 16px; text-align: center;">
+            <p style="margin: 0; color: #64748b; font-size: 12px;">
+                &copy; <?= htmlspecialchars($year) ?> Barangay Pembo. All rights reserved.
+            </p>
+        </div>
+    </div>
+</div>

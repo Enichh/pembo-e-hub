@@ -1,0 +1,389 @@
+/* features/navigation/components/nav.css
+ * App navigation: left sidebar on desktop, bottom tab bar on mobile.
+ * Presentation only. Markup is rendered by nav.js. */
+
+:root {
+    --nav-accent: #1e40af;
+    --nav-accent-soft: #eff6ff;
+    --nav-text: #0f172a;
+    --nav-muted: #64748b;
+    --nav-border: #e2e8f0;
+    --nav-bg: #ffffff;
+    --nav-sidebar-width: 228px;
+}
+
+/* ---------- Sidebar (desktop) ---------- */
+.nav-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--nav-sidebar-width);
+    background: var(--nav-bg);
+    border-right: 1px solid var(--nav-border);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    z-index: 100;
+    overflow-y: auto;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    padding: 4px 8px 16px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--nav-border);
+}
+
+.nav-brand img {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+}
+
+.nav-brand-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: -0.01em;
+    color: var(--nav-text);
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--nav-muted);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+}
+
+.nav-link svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-link:hover {
+    color: var(--nav-accent);
+    background: var(--nav-accent-soft);
+}
+
+.nav-link.is-active {
+    color: var(--nav-accent);
+    background: var(--nav-accent-soft);
+    font-weight: 600;
+}
+
+.nav-signout {
+    margin-top: 12px;
+    border-top: 1px solid var(--nav-border);
+    padding-top: 12px;
+}
+
+/* Inside the sidebar footer, the container already provides the separator. */
+.nav-footer .nav-signout {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Page content offset for the fixed sidebar. */
+body.has-sidebar {
+    padding-left: var(--nav-sidebar-width);
+}
+
+/* ---------- Bottom tab bar (mobile) ---------- */
+.nav-bottom {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    background: var(--nav-bg);
+    border-top: 1px solid var(--nav-border);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+
+.nav-bottom-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    min-height: 48px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--nav-muted);
+    font-size: 0.68rem;
+    font-weight: 500;
+}
+
+.nav-bottom-item svg {
+    width: 22px;
+    height: 22px;
+}
+
+.nav-bottom-item.is-active {
+    color: var(--nav-accent);
+    font-weight: 600;
+}
+
+body.has-bottom-nav {
+    padding-bottom: 72px;
+}
+
+/* ---------- Responsive switch ---------- */
+@media (max-width: 719px) {
+    .nav-sidebar { display: none; }
+    body.has-sidebar { padding-left: 0; }
+    /* Symmetric horizontal gutter so content is centered (not glued to an
+       edge) once the fixed sidebar is removed. The base body padding is 24px;
+       on a narrow phone 16px both sides reads better without crowding. */
+    body.has-bottom-nav { padding-left: 16px; padding-right: 16px; }
+}
+
+@media (min-width: 720px) {
+    .nav-bottom { display: none; }
+    body.has-bottom-nav { padding-bottom: 0; }
+}
+
+/* Nudge the page so the fixed sidebar never overlaps content on narrow. */
+@media (max-width: 479px) {
+    body.has-bottom-nav { padding-bottom: 64px; }
+}
+
+/* ---------- Top app bar (mobile) ---------- */
+.nav-topbar {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 120;
+    height: 56px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 12px;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+}
+
+.nav-topbar .nav-brand {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+.nav-topbar .nav-brand img {
+    width: 30px;
+    height: 30px;
+}
+
+.nav-topbar .nav-brand-name {
+    font-size: 0.9rem;
+}
+
+.nav-topbar-end {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* In-flow theme toggle (topbar + sidebar). Not fixed; it lives inside the nav.
+   The mobile topbar + floating fallback are icon-only (40x40); the desktop
+   sidebar variant carries a `.nav-link` class and renders icon + label. */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--nav-muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.theme-toggle:hover {
+    background: var(--nav-accent-soft);
+    color: var(--nav-accent);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Sidebar footer (theme toggle + sign out). */
+.nav-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 12px;
+    border-top: 1px solid var(--nav-border);
+    padding-top: 12px;
+}
+
+/* Desktop sidebar: theme toggle matches the nav-link rows (icon + label). */
+.nav-footer .theme-toggle {
+    width: 100%;
+    height: auto;
+    justify-content: flex-start;
+    border-radius: 8px;
+    padding: 10px 12px;
+    gap: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--nav-muted);
+}
+.nav-footer .theme-toggle svg,
+.nav-footer .theme-toggle [data-theme-icon] svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+.nav-footer .theme-toggle [data-theme-icon] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.nav-footer .theme-toggle:hover {
+    background: var(--nav-accent-soft);
+    color: var(--nav-accent);
+}
+
+.nav-hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--nav-text);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.nav-hamburger:hover {
+    background: var(--nav-accent-soft);
+}
+
+.nav-hamburger-icon,
+.nav-hamburger-icon svg {
+    display: flex;
+    width: 22px;
+    height: 22px;
+}
+
+/* Reserve space so page content clears the fixed top bar on mobile. */
+/* Padding is scoped to mobile below; desktop keeps its normal body padding. */
+
+/* ---------- Drawer + backdrop (mobile) ---------- */
+.nav-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 130;
+    background: rgba(15, 23, 42, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+.nav-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 131;
+    width: min(78vw, 300px);
+    background: var(--nav-bg);
+    border-right: 1px solid var(--nav-border);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    box-shadow: 8px 0 28px rgba(15, 23, 42, 0.18);
+    transform: translateX(-100%);
+    transition: transform 0.26s cubic-bezier(0.22, 0.8, 0.35, 1);
+}
+
+.nav-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--nav-border);
+}
+
+.nav-drawer-head .nav-brand {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.nav-drawer-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: var(--nav-muted);
+    cursor: pointer;
+}
+
+.nav-drawer-close:hover {
+    background: var(--nav-accent-soft);
+    color: var(--nav-accent);
+}
+
+.nav-drawer-close svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* Open state: slide the drawer in and fade the backdrop. */
+body.nav-open .nav-drawer { transform: translateX(0); }
+body.nav-open .nav-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ---------- Mobile-only visibility ---------- */
+@media (max-width: 719px) {
+    .nav-topbar { display: flex; }
+    body.has-topbar { padding-top: 56px; }
+}
+
+@media (min-width: 720px) {
+    .nav-topbar,
+    .nav-backdrop,
+    .nav-drawer { display: none; }
+    body.has-topbar { padding-top: 0; }
+}

@@ -1,0 +1,93 @@
+/* features/emergency/components/emergency.css
+ * Emergency SOS slice presentation. Structure rendered by emergency.js;
+ * this file owns styles only. Reuses shared status-pill/record-item/state-box
+ * classes from dashboard.css and .modal/.modal-backdrop/.btn from components.css
+ * (both loaded on the same page). The confirmation modal + legal disclaimer
+ * styles live here. */
+
+/* The backdrop reuses components.css .modal-backdrop (flex centering, display
+   toggle). Scope the inner modal width to the emergency confirmation content. */
+#sos-confirm-modal .modal {
+    width: 100%;
+    max-width: 520px;
+}
+
+.modal-title { margin: 0 0 16px; color: var(--text-main); }
+
+/* Compact two-column readout of the captured report. */
+.sos-confirm-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-main);
+    margin-bottom: 14px;
+}
+.sos-confirm-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.sos-confirm-row span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+}
+.sos-confirm-row strong {
+    font-size: 0.9rem;
+    color: var(--text-main);
+    overflow-wrap: anywhere;
+}
+
+/* Legal disclaimer callout. */
+.sos-disclaimer {
+    padding: 12px 14px;
+    border: 1px solid var(--danger);
+    border-radius: 10px;
+    background: #fef2f2;
+    color: #7f1d1d;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 14px;
+}
+.sos-disclaimer strong { color: var(--danger); }
+.sos-disclaimer em { font-style: normal; font-weight: 700; }
+
+/* Acknowledgment checkbox. */
+.sos-ack {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--text-main);
+    cursor: pointer;
+    margin-bottom: 16px;
+}
+.sos-ack input {
+    margin-top: 2px;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--danger);
+    flex-shrink: 0;
+}
+
+.sos-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Dark theme overrides for the disclaimer + summary surfaces. */
+[data-theme="dark"] .sos-disclaimer {
+    background: #450a0a;
+    color: #fca5a5;
+    border-color: #7f1d1d;
+}
+[data-theme="dark"] .sos-confirm-summary {
+    background: #0f172a;
+}

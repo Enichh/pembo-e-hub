@@ -1,0 +1,419 @@
+/* src/assets/theme.css
+ * Universal light/dark theming. Loaded LAST on every page so its
+ * `[data-theme="dark"]` overrides win over the slice stylesheets.
+ *
+ * Light values are the defaults already declared in base.css / landing.css /
+ * auth.css :root blocks; this file only re-declares the DARK variant and a few
+ * hardcoded light colors that need dark overrides. */
+
+/* ---------- Dark palette (variables) ---------- */
+[data-theme="dark"] {
+    /* shared (base.css/components.css) */
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --bg-main: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #e2e8f0;
+    --text-muted: #94a3b8;
+    --border: #334155;
+    --success: #22c55e;
+    --danger: #f87171;
+    --warning: #fbbf24;
+
+    /* landing slice */
+    --landing-primary: #60a5fa;
+    --landing-primary-dark: #3b82f6;
+    --landing-accent: #38bdf8;
+    --landing-text: #e2e8f0;
+    --landing-muted: #94a3b8;
+    --landing-border: #334155;
+    --landing-bg: #0f172a;
+    --landing-card: #1e293b;
+
+    /* navigation slice */
+    --nav-accent: #60a5fa;
+    --nav-accent-soft: #1e293b;
+    --nav-text: #e2e8f0;
+    --nav-muted: #94a3b8;
+    --nav-border: #334155;
+    --nav-bg: #0f172a;
+}
+
+/* ---------- Hardcoded light surfaces → dark ---------- */
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group select,
+[data-theme="dark"] .form-group textarea,
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .field,
+[data-theme="dark"] .modal {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+[data-theme="dark"] th {
+    background: #1e293b;
+}
+
+[data-theme="dark"] .btn-secondary {
+    background: #334155;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .btn-secondary:hover {
+    background: #475569;
+}
+
+/* soft-tinted surfaces (status badges) keep readable on dark */
+[data-theme="dark"] .badge-status-pending { background: #422006; color: #fcd34d; }
+[data-theme="dark"] .badge-status-rejected { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .badge-status-cancelled { background: #334155; color: #cbd5e1; }
+[data-theme="dark"] .badge-status-verifying { background: #1e1b4b; color: #c7d2fe; }
+[data-theme="dark"] .badge-status-approved { background: #172554; color: #93c5fd; }
+[data-theme="dark"] .badge-status-ready_for_pickup { background: #052e16; color: #86efac; }
+[data-theme="dark"] .badge-status-completed { background: #16a34a; color: #ffffff; }
+[data-theme="dark"] .badge-paid { background: #052e16; color: #86efac; }
+[data-theme="dark"] .badge-unpaid { background: #450a0a; color: #fca5a5; }
+
+/* auth slice: body gradient + verification modal */
+[data-theme="dark"] .auth-body {
+    background: linear-gradient(180deg, #0b1220 0%, var(--bg-main) 100%);
+}
+[data-theme="dark"] .verify-modal,
+[data-theme="dark"] .reset-modal,
+[data-theme="dark"] .auth-card {
+    background: #1e293b;
+    border-color: var(--border);
+}
+[data-theme="dark"] .verify-pin-input,
+[data-theme="dark"] .reset-pin-input {
+    background: #0f172a;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .verify-modal h2,
+[data-theme="dark"] .reset-title,
+[data-theme="dark"] .auth-title {
+    color: #e2e8f0;
+}
+
+/* auth tabs (login/register) + gender radio pills */
+[data-theme="dark"] .auth-tabs {
+    background: #0f172a;
+}
+[data-theme="dark"] .auth-tab.active {
+    background: #1e293b;
+    color: #60a5fa;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .auth-tab:not(.active) {
+    color: #94a3b8;
+}
+[data-theme="dark"] .radio-pill {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .radio-pill:has(input:checked) {
+    background: #172554;
+    border-color: #60a5fa;
+    color: #60a5fa;
+}
+
+/* birthdate calendar */
+[data-theme="dark"] .bd-calendar {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .bd-cal-head {
+    border-color: #334155;
+}
+[data-theme="dark"] .bd-cal-select {
+    background: #1e293b;
+    border-color: #334155;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .bd-cal-day:not(.is-disabled):not(.is-selected) {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .bd-cal-day.is-disabled {
+    color: #475569;
+}
+
+/* landing slice: header + hero */
+[data-theme="dark"] .site-header {
+    background: rgba(15, 23, 42, 0.92);
+}
+[data-theme="dark"] .hero {
+    background: transparent;
+}
+[data-theme="dark"] .service-card,
+[data-theme="dark"] .step {
+    background: #1e293b;
+}
+[data-theme="dark"] .service-icon {
+    background: #172554;
+}
+[data-theme="dark"] .cta {
+    background: #1e3a8a;
+}
+[data-theme="dark"] .site-footer {
+    background: #0f172a;
+}
+
+/* dashboard slice */
+[data-theme="dark"] .summary-card,
+[data-theme="dark"] .action-card,
+[data-theme="dark"] .record-item,
+[data-theme="dark"] .state-box {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .action-icon,
+[data-theme="dark"] .summary-card-icon,
+[data-theme="dark"] .state-box-icon {
+    background: linear-gradient(135deg, #172554 0%, #1e1b4b 100%);
+    color: var(--primary);
+}
+[data-theme="dark"] .action-card:hover,
+[data-theme="dark"] .summary-card:hover,
+[data-theme="dark"] .record-item:hover {
+    border-color: rgba(96, 165, 250, 0.4);
+}
+[data-theme="dark"] .action-card-title,
+[data-theme="dark"] .summary-card-value,
+[data-theme="dark"] .record-item-title,
+[data-theme="dark"] .state-box-title,
+[data-theme="dark"] .dash-section-head h3 {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .action-card-sub,
+[data-theme="dark"] .summary-card-label,
+[data-theme="dark"] .record-item-meta,
+[data-theme="dark"] .state-box-sub {
+    color: #94a3b8;
+}
+[data-theme="dark"] .dash-section-eyebrow {
+    color: #60a5fa;
+}
+[data-theme="dark"] .record-icon {
+    background: #1e293b;
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+/* documents slice */
+[data-theme="dark"] .doc-card,
+[data-theme="dark"] .doc-type-card,
+[data-theme="dark"] .doc-preview {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .doc-type-card.is-selected {
+    background: #172554;
+    border-color: #60a5fa;
+}
+[data-theme="dark"] .doc-dropzone {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .doc-dropzone:hover,
+[data-theme="dark"] .doc-dropzone.is-dragover {
+    border-color: #60a5fa;
+    background: #172554;
+}
+[data-theme="dark"] .doc-dropzone.is-error {
+    background: #450a0a;
+    border-color: #f87171;
+}
+[data-theme="dark"] .doc-dropzone-icon {
+    background: linear-gradient(135deg, #172554 0%, #1e1b4b 100%);
+    color: #60a5fa;
+}
+[data-theme="dark"] .doc-textarea {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .doc-intro h1,
+[data-theme="dark"] .doc-section-head h2,
+[data-theme="dark"] .doc-type-name,
+[data-theme="dark"] .doc-dropzone-text,
+[data-theme="dark"] .doc-preview-name {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .doc-preview-thumb {
+    background: #0f172a;
+    border-color: #334155;
+}
+[data-theme="dark"] .doc-preview-thumb.is-pdf {
+    background: #450a0a;
+    color: #fca5a5;
+}
+
+/* appointments slice */
+[data-theme="dark"] .apt-card,
+[data-theme="dark"] .apt-service-card,
+[data-theme="dark"] .apt-slot {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .apt-service-card.is-selected {
+    background: #172554;
+    border-color: #60a5fa;
+}
+[data-theme="dark"] .apt-service-icon {
+    background: linear-gradient(135deg, #172554 0%, #1e1b4b 100%);
+    color: #60a5fa;
+}
+[data-theme="dark"] .apt-date {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .apt-intro h1,
+[data-theme="dark"] .apt-section-head h2,
+[data-theme="dark"] .apt-service-name,
+[data-theme="dark"] .apt-slot {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .apt-slot:hover {
+    background: #172554;
+    border-color: #60a5fa;
+}
+[data-theme="dark"] .apt-calendar {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .apt-cal-head {
+    border-color: #334155;
+}
+[data-theme="dark"] .apt-cal-title,
+[data-theme="dark"] .apt-cal-day:not(.is-disabled):not(.is-selected) {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .apt-cal-day.is-disabled {
+    color: #475569;
+}
+[data-theme="dark"] .apt-cal-nav {
+    border-color: #334155;
+    color: #94a3b8;
+}
+
+/* toast */
+[data-theme="dark"] .pembo-toast {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .pembo-toast-code {
+    background: #0f172a;
+}
+[data-theme="dark"] .pembo-toast-success .pembo-toast-icon { background: #052e16; color: #86efac; }
+[data-theme="dark"] .pembo-toast-error .pembo-toast-icon { background: #450a0a; color: #fca5a5; }
+[data-theme="dark"] .pembo-toast-info .pembo-toast-icon { background: #1e1b4b; color: #c7d2fe; }
+
+/* profile slice */
+[data-theme="dark"] .prof-card,
+[data-theme="dark"] .state-box {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .prof-field {
+    border-color: #334155;
+}
+[data-theme="dark"] .prof-intro h1,
+[data-theme="dark"] .prof-section-head h2,
+[data-theme="dark"] .prof-avatar-name,
+[data-theme="dark"] .prof-field-value,
+[data-theme="dark"] .state-box-title {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .prof-avatar-sub,
+[data-theme="dark"] .prof-field-label,
+[data-theme="dark"] .state-box-sub {
+    color: #94a3b8;
+}
+[data-theme="dark"] .prof-field-value.is-empty {
+    color: #94a3b8;
+}
+
+
+/* admin slice: re-declare the admin console's private --admin-* tokens so the
+   console follows the theme. admin.css holds light-only defaults in :root; the
+   tokens below (cards, tables, modals, metric icons, badges) flip to dark. */
+[data-theme="dark"] {
+    --admin-primary: #60a5fa;
+    --admin-primary-dark: #3b82f6;
+    --admin-gold: #fcd34d;
+    --admin-gold-bg: #422006;
+    --admin-green: #86efac;
+    --admin-green-bg: #052e16;
+    --admin-red: #fca5a5;
+    --admin-red-bg: #450a0a;
+    --admin-card: #1e293b;
+    --admin-border: #334155;
+    --admin-text: #e2e8f0;
+    --admin-muted: #94a3b8;
+    --admin-bg: #0f172a;
+}
+
+/* hardcoded light tints in admin.css that need dark-safe equivalents */
+[data-theme="dark"] .admin-badge-good { background: #052e16; color: #86efac; }
+[data-theme="dark"] .admin-badge-warn { background: #422006; color: #fcd34d; }
+[data-theme="dark"] .admin-badge-danger { background: #450a0a; color: #fca5a5; }
+
+/* interactive highlights that were tuned for the light surfaces */
+[data-theme="dark"] .admin-table tr:hover td { background: rgba(96, 165, 250, 0.08); }
+[data-theme="dark"] .admin-tab-btn.active { background: rgba(96, 165, 250, 0.12); }
+[data-theme="dark"] .admin-filter-bar input::placeholder,
+[data-theme="dark"] .admin-search-input::placeholder { color: #64748b; }
+
+/* ---------- Theme toggle button ----------
+   On authenticated pages the toggle is rendered inside the nav (see nav.css)
+   and is in-flow. On landing/auth pages there is no nav, so theme.js injects a
+   floating fallback button directly into <body>; that fallback keeps the
+   fixed bottom-right position here. */
+body > .theme-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1100;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    color: var(--text-main);
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    transition: transform 0.12s, background 0.15s, color 0.15s;
+}
+
+body > .theme-toggle:hover {
+    transform: translateY(-1px);
+}
+
+body > .theme-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ---------- Theme-switch animation (View Transitions API) ---------- */
+/* Neutralize the default cross-fade/scale on the group container AND the
+   old/new layers so our clip-path grow animation (driven from the toggle
+   button in JS) is the only thing animating. Without disabling the group
+   animation, the browser scales the snapshot from its center, which visually
+   looks like the circle grows from the middle of the screen. */
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+    z-index: 1;
+}
+
+::view-transition-new(root) {
+    z-index: 2;
+}

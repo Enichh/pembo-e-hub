@@ -1,0 +1,154 @@
+/* src/assets/verification.css
+ * Shared styles for the verification (6-digit PIN) modal. Reused by any slice
+ * that needs an email-code gate. Kept in src/assets so it is cross-cutting. */
+
+.verify-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.verify-backdrop.is-open {
+    display: flex;
+}
+
+.verify-modal {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    padding: 28px 24px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.verify-modal h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px;
+}
+
+.verify-modal p {
+    font-size: 0.9rem;
+    color: #64748b;
+    margin: 0 0 8px;
+}
+
+.verify-email {
+    font-weight: 600;
+    color: #1D64F2;
+    word-break: break-all;
+}
+
+.verify-pin-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 20px 0 16px;
+}
+
+.verify-pin-input {
+    width: 48px;
+    height: 56px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.verify-pin-input:focus {
+    border-color: #1D64F2;
+    box-shadow: 0 0 0 3px rgba(29, 100, 242, 0.18);
+}
+
+.verify-error {
+    font-size: 0.82rem;
+    color: #dc2626;
+    min-height: 1.2em;
+    margin: 0 0 12px;
+}
+
+/* Loading / status feedback area */
+.verify-status {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary, #1D64F2);
+    min-height: 1.2em;
+    margin: 0 0 12px;
+}
+
+.verify-status.is-visible {
+    display: flex;
+}
+
+.verify-status.is-success {
+    color: #166534;
+}
+
+.verify-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e2e8f0;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: verify-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+.verify-status.is-success .verify-spinner {
+    display: none;
+}
+
+.verify-status .verify-check {
+    display: none;
+}
+
+.verify-status.is-success .verify-check {
+    display: inline;
+}
+
+@keyframes verify-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Disabled pin inputs during submit */
+.verify-pin-input:disabled {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.verify-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.verify-resend {
+    background: none;
+    border: none;
+    color: #1D64F2;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.verify-resend:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
+}

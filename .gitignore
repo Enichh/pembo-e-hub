@@ -1,0 +1,24 @@
+# Pembo e-Hub
+
+# Secrets — never commit
+.env
+
+# Composer dependencies
+/vendor/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Test artifacts
+.playwright-mcp/
+
+# Runtime user data — never commit (contains resident PII)
+/public/storage/resident_ids/
+/public/storage/uploads/
+
+# Database dumps (may contain credentials + resident PII)
+*.sql
+﻿

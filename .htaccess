@@ -1,0 +1,88 @@
+# Pembo e-Hub — shared-htdocs deployment security + clean routing.
+#
+# The app is served from /pembo-e-hub/ under a shared DocumentRoot
+# (C:/xampp/htdocs), so `public/` is the only directory intended to be
+# web-reachable. Everything beneath it is routed in two ways:
+#
+#   Clean URLs (what index.html actually uses):
+#     /pembo-e-hub/            -> public/index.html
+#     /pembo-e-hub/api.php     -> public/api.php
+#     /pembo-e-hub/src/*       -> public/src/*   (assets: CSS/JS/images)
+#
+#   Direct (also permitted, for tooling/testing):
+#     /pembo-e-hub/public/*    -> public/*
+#
+# Sensitive trees and files are hard-blocked (403) regardless of path.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # ------------------------------------------------------------------
+    # 1. Block everything sensitive BEFORE any rewrite can expose it.
+    #    These rules fire on the raw URL and drop the request with 403.
+    # ------------------------------------------------------------------
+
+    # Storage (uploaded resident IDs / supporting documents). Deny both the
+    # clean and the public/ spelling so no rewrite can reach it.
+    RewriteRule ^(public/)?storage(/.*)?$ - [F]
+
+    # PHP source, config, migrations, seeds, logs, env, and any dotfiles.
+    # Note: the .php suffix guard (step after) catches source files; this rule
+    # blocks the code directories that must never be web-reachable, while
+    # still allowing the nested `components/` asset folders (CSS/JS) under src/.
+    RewriteRule ^(public/)?src/config(/.*)?$ - [F]
+    RewriteRule ^(public/)?src/lib(/.*)?$ - [F]
+    RewriteRule ^(public/)?src/migrations(/.*)?$ - [F]
+    RewriteRule ^(public/)?src/seeds(/.*)?$ - [F]
+    RewriteRule ^(public/)?src/features/.*\.php$ - [F]
+    RewriteRule ^(public/)?vendor(/.*)?$ - [F]
+    RewriteRule \.env($|/.*) [F]
+    RewriteRule \.log$ [F]
+
+    # SQL dumps and documentation — never servable.
+    RewriteRule \.(sql|md)$ - [F]
+
+    # ------------------------------------------------------------------
+    # 2. Public assets live under public/src/<assets|features/*/components>.
+    #    The app requests them at /src/... (root-relative), so map cleanly.
+    #    Only allow the *asset* subtree; step 1 already denied the code.
+    # ------------------------------------------------------------------
+
+    # Serve public/ directly (defense in depth: nothing sensitive under it).
+    RewriteRule ^public/ - [L]
+
+    # api.php -> public/api.php
+    RewriteRule ^api\.php$ public/api.php [L]
+
+    # src/ assets -> public/src/ (CSS, JS, images)
+    RewriteRule ^src/(.*)$ public/src/$1 [L]
+
+    # Landing page is the site root; the auth app lives at index.html.
+    RewriteRule ^$ public/landing.html [L]
+    RewriteRule ^index\.html$ public/index.html [L]
+    RewriteRule ^landing\.html$ public/landing.html [L]
+
+    # Option B: one SPA per role (hash-routed), plus landing/auth entry.
+    RewriteRule ^dashboard\.html$ public/dashboard.html [L]
+    RewriteRule ^staffdashboard\.html$ public/staffdashboard.html [L]
+    RewriteRule ^admindashboard\.html$ public/admindashboard.html [L]
+</IfModule>
+
+# ----------------------------------------------------------------------
+# 3. Files to deny outright regardless of rewrite (defense in depth).
+# ----------------------------------------------------------------------
+<FilesMatch "(^\.|\.(env|sql|md|log|ini|sh|dist)$)">
+    Require all denied
+</FilesMatch>
+
+# ----------------------------------------------------------------------
+# 4. Security headers.
+# ----------------------------------------------------------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>

@@ -1,0 +1,64 @@
+/* src/assets/base.css
+ * ITCSS layer 1 (base): design tokens, ground-zero reset, and unclassed
+ * element defaults. Low specificity, global reach — everything else builds
+ * on top of these. No layout or component rules belong here.
+ *
+ * Declares the cascade layer order up front so precedence is explicit and
+ * deterministic regardless of source order or specificity: later layers win.
+ *   base → layout → components → features → theme
+ * Load order on every page: base.css → layout.css → components.css →
+ * feature CSS → theme.css. See REFACTOR_PLAN.md §Phase 8.
+ */
+
+@layer base, layout, components, features, theme;
+
+@layer base {
+
+:root {
+    --primary: #1D64F2;
+    --primary-hover: #1854d4;
+    --bg-main: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #d97706;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding: 24px;
+}
+
+/* Base table styling (cells/scaffolding); the .table-responsive wrapper and
+   feature-specific chrome live in components/feature CSS, not here. */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+} /* end @layer base */

@@ -1,0 +1,176 @@
+/* features/complaints/components/complaints.css
+ * Presentation for the complaints slice. Mirrors the landing/dashboard design
+ * language: soft radius, gradient accents, hover lift. Reuses shared
+ * .card/.form-group/.btn classes from components.css where possible. */
+
+:root {
+    --cmp-accent: #1D64F2;
+    --cmp-accent-dark: #1854d4;
+    --cmp-accent-soft: #eff6ff;
+    --cmp-text: #0f172a;
+    --cmp-muted: #64748b;
+    --cmp-border: #e2e8f0;
+    --cmp-card: #ffffff;
+    --cmp-danger: #dc2626;
+}
+
+.cmp { display: flex; flex-direction: column; gap: 20px; }
+
+/* The cards render inside #cmp-content (populated by complaints.js), so give
+   that wrapper its own flex gap to space sections evenly. */
+#cmp-content { display: flex; flex-direction: column; gap: 20px; }
+
+.cmp-intro h1 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--cmp-text);
+    margin-bottom: 2px;
+}
+.cmp-intro p { color: var(--cmp-muted); font-size: 0.88rem; margin: 0; }
+
+.cmp-card {
+    background: var(--cmp-card);
+    border: 1px solid var(--cmp-border);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.cmp-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.cmp-section-head h2 {
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--cmp-text);
+    margin: 0;
+}
+
+.cmp-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+.cmp-form-grid .form-group { margin-bottom: 0; }
+.cmp-form-grid .full { grid-column: 1 / -1; }
+
+/* Incident date: custom calendar (bounded width) + time input. */
+.cmp-date-group .bd-calendar { max-width: 360px; }
+.cmp-time { max-width: 160px; margin-top: 10px; }
+
+.cmp-submit {
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cmp-accent), var(--cmp-accent-dark));
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(29, 100, 242, 0.24);
+    transition: transform 0.12s, box-shadow 0.15s;
+}
+.cmp-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(29, 100, 242, 0.32);
+}
+.cmp-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+.cmp-hint { font-size: 0.78rem; color: var(--cmp-muted); margin-top: 6px; }
+.cmp-hint.cmp-hint-error { color: var(--cmp-danger); font-weight: 500; }
+
+.cmp-alert {
+    display: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-top: 12px;
+}
+.cmp-alert.is-visible { display: block; }
+.cmp-alert.is-success { background: #dcfce7; color: #166534; }
+.cmp-alert.is-error { background: #fef2f2; color: #b91c1c; }
+
+/* Empty/loading state (self-contained; dashboard.css is not loaded here). */
+.state-box {
+    text-align: center;
+    padding: 26px 20px;
+    background: var(--cmp-card);
+    border: 1px dashed var(--cmp-border);
+    border-radius: 12px;
+    color: var(--cmp-text);
+}
+.state-box-title { font-weight: 700; margin-bottom: 4px; }
+.state-box-sub { font-size: 0.88rem; color: var(--cmp-muted); }
+
+/* Complaint list + status pills (staff queue and resident history). */
+.cmp-record {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--cmp-border);
+}
+.cmp-record:last-child { border-bottom: none; }
+.cmp-record-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: space-between;
+}
+.cmp-record-title { font-weight: 700; font-size: 0.92rem; color: var(--cmp-text); }
+.cmp-record-meta { font-size: 0.78rem; color: var(--cmp-muted); }
+
+.cmp-status-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+.cmp-status-FILED { background: #e0e7ff; color: #3730a3; }
+.cmp-status-UNDER_INVESTIGATION { background: #dbeafe; color: #1e40af; }
+.cmp-status-HEARING_SCHEDULED { background: #fef3c7; color: #92400e; }
+.cmp-status-RESOLVED { background: #dcfce7; color: #166534; }
+.cmp-status-DISMISSED { background: #f1f5f9; color: #64748b; }
+
+/* Staff queue action row (select officer + status). */
+.cmp-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+.cmp-action-row .form-group { min-width: 160px; flex: 1; margin-bottom: 0; }
+
+@media (min-width: 640px) {
+    .cmp-form-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Dark theme overrides. */
+[data-theme="dark"] .cmp-card,
+[data-theme="dark"] .state-box {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .cmp-record { border-color: #334155; }
+[data-theme="dark"] .cmp-intro h1,
+[data-theme="dark"] .cmp-section-head h2,
+[data-theme="dark"] .cmp-record-title,
+[data-theme="dark"] .state-box-title {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .cmp-record-meta,
+[data-theme="dark"] .state-box-sub,
+[data-theme="dark"] .cmp-hint {
+    color: #94a3b8;
+}

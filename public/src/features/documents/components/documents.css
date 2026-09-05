@@ -1,0 +1,513 @@
+/* features/documents/components/documents.css
+ * Presentation for the documents slice. Mirrors the landing/dashboard design
+ * language: soft radius, gradient accents, hover lift, informative states. */
+
+:root {
+    --doc-accent: #1D64F2;
+    --doc-accent-dark: #1854d4;
+    --doc-accent-soft: #eff6ff;
+    --doc-text: #0f172a;
+    --doc-muted: #64748b;
+    --doc-border: #e2e8f0;
+    --doc-card: #ffffff;
+    --doc-success: #16a34a;
+    --doc-danger: #dc2626;
+}
+
+.doc { display: flex; flex-direction: column; gap: 20px; }
+
+/* The form wraps the three step cards + submit button; give it the same gap so
+   every section is evenly spaced. */
+#create-doc-form { display: flex; flex-direction: column; gap: 20px; }
+
+.doc-intro { margin-bottom: 4px; }
+.doc-intro h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--doc-text);
+    margin-bottom: 4px;
+}
+.doc-intro p { color: var(--doc-muted); font-size: 0.92rem; }
+
+.doc-card {
+    background: var(--doc-card);
+    border: 1px solid var(--doc-border);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.doc-section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.doc-section-head h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--doc-text);
+    margin: 0;
+}
+.doc-section-num {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--doc-accent), var(--doc-accent-dark));
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ---------- Document type picker ---------- */
+.doc-type-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.doc-type-card {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--doc-border);
+    border-radius: 12px;
+    background: var(--doc-card);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.doc-type-card:hover {
+    border-color: rgba(29, 100, 242, 0.35);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+.doc-type-card.is-selected {
+    border-color: var(--doc-accent);
+    background: var(--doc-accent-soft);
+    box-shadow: 0 0 0 3px rgba(29, 100, 242, 0.12);
+}
+
+.doc-type-radio {
+    margin-top: 2px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--doc-accent);
+    cursor: pointer;
+}
+
+.doc-type-body { flex: 1; min-width: 0; }
+.doc-type-name {
+    display: block;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--doc-text);
+    margin-bottom: 2px;
+}
+
+/* ---------- Form fields ---------- */
+.doc-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--doc-muted);
+    margin-bottom: 7px;
+}
+.doc-label .req { color: var(--doc-danger); }
+.doc-hint { font-size: 0.78rem; color: var(--doc-muted); margin-top: 6px; }
+.doc-hint.doc-hint-error { color: var(--doc-danger); font-weight: 500; }
+
+.doc-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--doc-border);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 72px;
+    color: var(--doc-text);
+    background: var(--doc-card);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.doc-textarea:focus {
+    border-color: var(--doc-accent);
+    box-shadow: 0 0 0 3px rgba(29, 100, 242, 0.15);
+}
+
+/* ---------- Upload dropzone ---------- */
+.doc-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 28px 20px;
+    border: 2px dashed var(--doc-border);
+    border-radius: 12px;
+    background: var(--doc-accent-soft);
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+}
+.doc-dropzone:hover,
+.doc-dropzone.is-dragover {
+    border-color: var(--doc-accent);
+    background: #eaf3ff;
+}
+.doc-dropzone.is-error {
+    border-color: var(--doc-danger);
+    background: #fef2f2;
+}
+
+.doc-dropzone-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--doc-accent-soft) 100%);
+    color: var(--doc-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.doc-dropzone-text { font-weight: 700; font-size: 0.95rem; color: var(--doc-text); }
+.doc-dropzone-sub { font-size: 0.8rem; color: var(--doc-muted); }
+.doc-dropzone .browse { color: var(--doc-accent); font-weight: 700; }
+
+.doc-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ---------- Attachment preview card ---------- */
+.doc-preview {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid var(--doc-border);
+    border-radius: 12px;
+    background: var(--doc-card);
+    margin-top: 12px;
+}
+
+.doc-preview-thumb {
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid var(--doc-border);
+    flex-shrink: 0;
+    background: #f1f5f9;
+}
+.doc-preview-thumb.is-pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--doc-danger);
+    background: #fef2f2;
+}
+
+.doc-preview-meta { flex: 1; min-width: 0; }
+.doc-preview-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--doc-text);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+.doc-preview-size { font-size: 0.78rem; color: var(--doc-muted); }
+.doc-preview-ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--doc-success);
+    margin-top: 4px;
+}
+
+.doc-remove {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid var(--doc-border);
+    background: transparent;
+    color: var(--doc-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.doc-remove:hover {
+    color: var(--doc-danger);
+    border-color: var(--doc-danger);
+    background: #fef2f2;
+}
+.doc-remove svg { width: 16px; height: 16px; }
+
+/* ---------- Submit + requests list ---------- */
+.doc-submit {
+    width: 100%;
+    padding: 13px 18px;
+    border-radius: 10px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--doc-accent), var(--doc-accent-dark));
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(29, 100, 242, 0.24);
+    transition: transform 0.12s, box-shadow 0.15s;
+}
+.doc-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 26px rgba(29, 100, 242, 0.32);
+}
+.doc-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Requests table inside a card, with a column-safe wrapper. */
+
+/* ---------- Request details modal ---------- */
+.doc-modal {
+    max-width: 640px;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.doc-modal #modal-details-body {
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.doc-modal-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--doc-border);
+    margin-bottom: 16px;
+}
+.doc-modal-head-main { min-width: 0; }
+.doc-modal-head-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.doc-modal-kicker {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--doc-accent);
+    margin-bottom: 4px;
+}
+.doc-modal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--doc-text);
+}
+.doc-modal-sub { color: var(--doc-muted); font-size: 0.9rem; }
+.doc-modal-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--doc-muted);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.doc-modal-close:hover { background: var(--doc-accent-soft); color: var(--doc-text); }
+
+.doc-modal-section { margin-bottom: 20px; }
+.doc-modal-section:last-child { margin-bottom: 0; }
+.doc-modal-h {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--doc-muted);
+    margin: 0 0 10px;
+}
+
+/* Overview grid. */
+.doc-modal-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 16px;
+}
+.doc-modal-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--doc-border);
+    border-radius: 10px;
+    background: var(--doc-card);
+}
+.doc-modal-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--doc-muted);
+}
+.doc-modal-value { font-size: 0.92rem; font-weight: 600; color: var(--doc-text); overflow-wrap: anywhere; }
+.doc-modal-meta { font-size: 0.78rem; color: var(--doc-muted); }
+
+.doc-pay {
+    display: inline-flex;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+.doc-pay-paid { background: #dcfce7; color: #166534; }
+.doc-pay-unpaid { background: #fef2f2; color: #b91c1c; }
+
+/* Attachments. */
+.doc-attach-list { display: flex; flex-direction: column; gap: 12px; }
+.doc-attach {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--doc-border);
+    border-radius: 10px;
+    background: var(--doc-card);
+}
+.doc-attach-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+}
+.doc-attach-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--doc-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.doc-attach .attachment-preview { max-height: 220px; object-fit: contain; }
+
+/* Status timeline. */
+.doc-timeline {
+    border-left: 2px solid var(--doc-border);
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.doc-tl-item { position: relative; }
+.doc-tl-dot {
+    position: absolute;
+    left: -21px;
+    top: 4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--doc-accent);
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px var(--doc-border);
+}
+.doc-tl-status { font-weight: 700; font-size: 0.88rem; color: var(--doc-text); }
+.doc-tl-remarks { font-size: 0.85rem; color: var(--doc-text); margin-top: 2px; }
+
+/* Staff action section. */
+.doc-modal-staff {
+    border: 1px solid var(--doc-border);
+    border-radius: 12px;
+    padding: 16px;
+    background: #f8fafc;
+}
+.doc-modal-staff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+}
+.doc-modal-staff-grid .form-group { margin-bottom: 0; }
+.doc-modal-staff-grid .btn { margin-bottom: 1px; }
+.doc-modal-staff-pay { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--doc-border); }
+.doc-empty { color: var(--doc-muted); font-size: 0.88rem; }
+
+@media (max-width: 560px) {
+    .doc-modal-grid { grid-template-columns: 1fr; }
+    .doc-modal-staff-grid { grid-template-columns: 1fr; }
+}
+
+/* Dark theme. */
+[data-theme="dark"] .doc-modal-cell,
+[data-theme="dark"] .doc-attach,
+[data-theme="dark"] .doc-modal-staff {
+    background: #1e293b;
+    border-color: #334155;
+}
+[data-theme="dark"] .doc-modal-title,
+[data-theme="dark"] .doc-modal-value,
+[data-theme="dark"] .doc-attach-name,
+[data-theme="dark"] .doc-tl-status,
+[data-theme="dark"] .doc-tl-remarks { color: #e2e8f0; }
+[data-theme="dark"] .doc-modal-head { border-color: #334155; }
+[data-theme="dark"] .doc-timeline { border-color: #334155; }
+[data-theme="dark"] .doc-tl-dot { border-color: #1e293b; }
+[data-theme="dark"] .doc-modal-staff { background: #0f172a; }
+
+/* ---------- Pagination (My Document Requests) ---------- */
+.doc-pagination {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+.doc-pagination-inner {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.doc-pagination-info {
+    font-size: 0.82rem;
+    color: var(--doc-muted);
+    font-weight: 600;
+}
+.doc-pagination .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ---------- Responsive ---------- */
+@media (min-width: 640px) {
+    .doc-type-grid { grid-template-columns: repeat(2, 1fr); }
+}

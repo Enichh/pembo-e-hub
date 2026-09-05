@@ -1,0 +1,696 @@
+/* features/auth/components/auth.css
+ * Presentation for the login/register screen only. Layers on top of
+ * base.css/components.css (shared base). Kept separate so the auth slice owns
+ * its own styles and the shared base stays generic. */
+
+.auth-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 16px;
+    background: linear-gradient(180deg, #eff6ff 0%, var(--bg-main) 100%);
+}
+
+.auth-shell {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-back {
+    position: absolute;
+    top: -44px;
+    left: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 6px 8px 6px 2px;
+    border-radius: 6px;
+    transition: color 0.15s;
+}
+
+.auth-back:hover {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 28px 24px;
+    box-shadow: 0 10px 30px -6px rgba(15, 23, 42, 0.12);
+}
+
+.auth-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.auth-brand img {
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.auth-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--primary);
+    margin: 0 0 2px;
+}
+
+.auth-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* ---------- Alert ---------- */
+.auth-alert {
+    display: none;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+}
+
+.auth-alert.auth-alert-success {
+    display: block;
+    background: #dcfce7;
+    color: #166534;
+    border-color: #bbf7d0;
+}
+
+.auth-alert.auth-alert-error {
+    display: block;
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+/* ---------- Tabs ---------- */
+.auth-tabs {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 24px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 9px 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.auth-tab.active {
+    background: #ffffff;
+    color: var(--primary);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+/* ---------- Form ---------- */
+.auth-form .form-group {
+    margin-bottom: 18px;
+}
+
+.auth-form .form-group label {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    display: block;
+}
+
+.form-group label .opt {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
+    color: var(--text-muted);
+    opacity: 0.85;
+}
+
+.field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+}
+
+.form-row {
+    display: grid;
+    gap: 16px;
+}
+
+.form-row .form-group {
+    margin-bottom: 18px;
+}
+
+/* Gender radio pills */
+.radio-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.radio-pill {
+    position: relative;
+    flex: 1;
+    min-width: 80px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.radio-pill input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.radio-pill:has(input:checked) {
+    border-color: var(--primary);
+    background: #eff6ff;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.radio-pill:has(input:focus-visible) {
+    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.12);
+}
+
+.field {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    outline: none;
+    background: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+select.field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+textarea.field {
+    resize: vertical;
+    min-height: 56px;
+}
+
+.field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(29, 100, 242, 0.15);
+}
+
+.field.field-invalid {
+    border-color: var(--danger);
+}
+
+.field.field-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.field-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 6px 2px 0;
+    min-height: 1em;
+}
+
+.field-hint.field-hint-error {
+    color: var(--danger);
+    font-weight: 500;
+}
+
+/* Password visibility toggle */
+.password-wrap {
+    position: relative;
+}
+
+.password-wrap .field {
+    padding-right: 46px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+
+.password-toggle:hover {
+    color: var(--primary);
+    background: #eff6ff;
+}
+
+/* Password requirements checklist */
+.password-rules {
+    list-style: none;
+    margin: 8px 2px 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.password-rules li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    transition: color 0.15s;
+}
+
+.password-rules li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: #ffffff;
+}
+
+.password-rules li.rule-ok {
+    color: var(--success);
+}
+
+.password-rules li.rule-ok::before {
+    content: "";
+    border-color: var(--success);
+    background: var(--success);
+    box-shadow: inset 0 0 0 2px #ffffff;
+}
+
+/* ---------- Submit ---------- */
+.auth-submit {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-top: 4px;
+}
+
+.auth-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ---------- Footnote ---------- */
+.auth-footnote {
+    text-align: center;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 20px 0 0;
+}
+
+/* ---------- Forgot password ---------- */
+.auth-forgot {
+    display: block;
+    margin: 14px auto 0;
+    background: none;
+    border: none;
+    color: var(--primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-forgot:hover {
+    text-decoration: underline;
+}
+
+.auth-back-row {
+    margin-bottom: 18px;
+}
+
+.auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.auth-back-link:hover {
+    color: var(--primary);
+}
+
+/* ---------- Password reset modal (own modal) ---------- */
+.reset-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+.reset-backdrop.is-open {
+    display: flex;
+}
+
+.reset-modal {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    padding: 28px 24px;
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.25);
+    text-align: left;
+}
+
+.reset-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: none;
+    background: none;
+    font-size: 1.6rem;
+    line-height: 1;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.reset-close:hover {
+    color: var(--text-main);
+    background: var(--border);
+}
+
+.reset-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 4px;
+    text-align: center;
+}
+
+.reset-sub {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+    text-align: center;
+    word-break: break-all;
+}
+
+.reset-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.reset-pin-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 4px 0 16px;
+}
+
+.reset-pin-input {
+    width: 46px;
+    height: 54px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    outline: none;
+    color: var(--text-main);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.reset-pin-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(29, 100, 242, 0.18);
+}
+
+.reset-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.reset-resend {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.reset-resend:hover:not(:disabled) {
+    background: #eff6ff;
+}
+
+.reset-resend:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.reset-submit {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.reset-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.reset-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin: 6px 2px 0;
+}
+
+.reset-hint.field-hint-error {
+    color: var(--danger);
+    font-weight: 500;
+}
+
+.reset-error {
+    font-size: 0.82rem;
+    color: var(--danger);
+    min-height: 1.2em;
+    margin: 12px 0 0;
+    text-align: center;
+}
+
+/* Birthdate calendar styles moved to components.css (shared by register + profile). */
+
+/* ---------- Valid ID upload dropzone ---------- */
+.reg-dropzone {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 24px 18px;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    background: #eff6ff;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.reg-dropzone:hover,
+.reg-dropzone.is-dragover {
+    border-color: var(--primary);
+    background: #eaf3ff;
+}
+
+.reg-dropzone.is-error {
+    border-color: var(--danger);
+    background: #fef2f2;
+}
+
+.reg-dropzone-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3px;
+}
+
+.reg-dropzone-text {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-main);
+}
+
+.reg-dropzone-text .browse {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.reg-dropzone-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.reg-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* ---------- Valid ID preview card ---------- */
+.reg-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    margin-top: 10px;
+}
+
+.reg-preview-thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    background: #f1f5f9;
+}
+
+.reg-preview-thumb.is-pdf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--danger);
+    background: #fef2f2;
+}
+
+.reg-preview-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.reg-preview-name {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--text-main);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.reg-preview-size {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+}
+
+.reg-preview-ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--success);
+    margin-top: 4px;
+}
+
+.reg-remove {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.reg-remove:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    background: #fef2f2;
+}
+
+.reg-remove svg {
+    width: 16px;
+    height: 16px;
+}

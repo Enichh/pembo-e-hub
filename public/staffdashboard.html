@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard | Pembo e-Hub</title>
+    <link rel="icon" type="image/png" href="src/assets/pembologo.png">
+    <script src="src/assets/theme.js"></script>
+    <link rel="stylesheet" href="src/assets/base.css">
+    <link rel="stylesheet" href="src/assets/layout.css">
+    <link rel="stylesheet" href="src/assets/components.css">
+    <link rel="stylesheet" href="src/features/navigation/components/nav.css">
+    <link rel="stylesheet" href="src/features/dashboard/components/dashboard.css">
+    <link rel="stylesheet" href="src/assets/queues.css">
+    <link rel="stylesheet" href="src/assets/leaflet/leaflet.css">
+    <link rel="stylesheet" href="src/assets/theme.css">
+</head>
+
+<body>
+    <nav id="app-nav"></nav>
+    <main class="container">
+        <div id="app-root"></div>
+    </main>
+
+    <!-- Shared infra (still IIFE/window.* — converted to ESM in a later phase). -->
+    <script src="src/assets/session.js"></script>
+    <script src="src/assets/toast.js"></script>
+    <script src="src/assets/button.js"></script>
+    <script src="src/features/navigation/components/nav.js"></script>
+
+    <!-- Leaflet (vendored, client-side map for the SOS dispatch board). -->
+    <script src="src/assets/leaflet/leaflet.js"></script>
+
+    <!-- Staff dashboard shell (ES module entry). -->
+    <script type="module" src="src/staffdashboard.js"></script>
+</body>
+
+</html>

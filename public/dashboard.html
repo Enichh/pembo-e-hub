@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Pembo e-Hub</title>
+    <link rel="icon" type="image/png" href="src/assets/pembologo.png">
+    <script src="src/assets/theme.js"></script>
+    <link rel="stylesheet" href="src/assets/base.css">
+    <link rel="stylesheet" href="src/assets/layout.css">
+    <link rel="stylesheet" href="src/assets/components.css">
+    <link rel="stylesheet" href="src/features/navigation/components/nav.css">
+    <link rel="stylesheet" href="src/features/dashboard/components/dashboard.css">
+    <link rel="stylesheet" href="src/features/documents/components/documents.css">
+    <link rel="stylesheet" href="src/features/appointments/components/appointments.css">
+    <link rel="stylesheet" href="src/features/complaints/components/complaints.css">
+    <link rel="stylesheet" href="src/features/emergency/components/emergency.css">
+    <link rel="stylesheet" href="src/features/profile/components/profile.css">
+    <link rel="stylesheet" href="src/assets/theme.css">
+</head>
+
+<body>
+    <nav id="app-nav"></nav>
+    <main class="container">
+        <div id="app-root"></div>
+    </main>
+
+    <!-- Shared infra (still IIFE/window.* — converted to ESM in a later phase). -->
+    <script src="src/assets/session.js"></script>
+    <script src="src/assets/toast.js"></script>
+    <script src="src/assets/button.js"></script>
+    <script src="src/assets/birthdate_calendar.js"></script>
+    <script src="src/features/navigation/components/nav.js"></script>
+
+    <!-- Resident dashboard shell (ES module entry). -->
+    <script type="module" src="src/dashboard.js"></script>
+</body>
+
+</html>
