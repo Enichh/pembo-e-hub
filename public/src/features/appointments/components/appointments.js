@@ -352,7 +352,7 @@ async function loadSlots() {
     if (!box) return;
 
     if (!selectedDate) {
-        box.innerHTML = '<div class="apt-no-date-prompt"><span class="apt-no-date-icon">📅</span><span>Please pick a date on the calendar to view available time slots.</span></div>';
+        box.innerHTML = `<div class="apt-no-date-prompt"><span class="apt-no-date-icon" aria-hidden="true">${ICONS.calendar}</span><span>Please pick a date on the calendar to view available time slots.</span></div>`;
         const hint = document.getElementById('apt-slot-hint');
         if (hint) {
             hint.textContent = 'Pick a date first to view time slots.';

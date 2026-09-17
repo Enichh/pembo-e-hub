@@ -265,7 +265,15 @@
 }
 
 .apt-no-date-icon {
-    font-size: 1.4rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--apt-accent);
+}
+
+.apt-no-date-icon svg {
+    width: 24px;
+    height: 24px;
 }
 
 .apt-slot {
