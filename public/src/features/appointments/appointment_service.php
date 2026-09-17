@@ -36,6 +36,23 @@ class AppointmentsService {
         return self::SLOTS;
     }
 
+    /**
+     * Get taken/booked appointment slots for a specific date across all residents.
+     *
+     * @param string $date YYYY-MM-DD
+     * @return string[] List of time slot strings already booked and not cancelled.
+     */
+    public function getTakenSlots(string $date): array {
+        $stmt = $this->pdo->prepare("
+            SELECT time_slot
+            FROM appointments
+            WHERE appointment_date = :date
+              AND status NOT IN ('CANCELLED')
+        ");
+        $stmt->execute([':date' => $date]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
     private PDO $pdo;
     private NotificationService $notifier;
 

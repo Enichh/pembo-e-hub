@@ -345,63 +345,107 @@ function shiftDay(y, m, d, delta) {
     return toYmd(dt);
 }
 
-/* Slots shown are the barangay's fixed windows. We annotate any slot the
- * resident has already booked on the chosen date so they don't re-book. */
+/* Slots shown are the barangay's fixed windows. We query available and booked slots
+ * for the chosen date and annotate taken slots clearly in the UI. */
 async function loadSlots() {
     const box = document.getElementById('appointment-slots');
     if (!box) return;
+
+    if (!selectedDate) {
+        box.innerHTML = '<div class="apt-no-date-prompt"><span class="apt-no-date-icon">📅</span><span>Please pick a date on the calendar to view available time slots.</span></div>';
+        const hint = document.getElementById('apt-slot-hint');
+        if (hint) {
+            hint.textContent = 'Pick a date first to view time slots.';
+            hint.classList.remove('apt-hint-error');
+        }
+        return;
+    }
+
     try {
-        const res = await fetch('api.php?action=appointment_slots');
+        const res = await fetch('api.php?action=appointment_slots&date=' + encodeURIComponent(selectedDate));
         const data = await res.json();
-        const slots = (data.success && Array.isArray(data.data)) ? data.data : [];
+        
+        let slots = [];
+        let takenSet = new Set();
+        if (data.success && data.data) {
+            if (Array.isArray(data.data)) {
+                slots = data.data;
+            } else if (data.data.slots && Array.isArray(data.data.slots)) {
+                slots = data.data.slots;
+                if (Array.isArray(data.data.taken)) {
+                    takenSet = new Set(data.data.taken);
+                }
+            }
+        }
+
         box.innerHTML = '';
         if (slots.length === 0) {
-            box.innerHTML = '<span class="text-muted" style="grid-column:1/-1;">No slots available.</span>';
+            box.innerHTML = '<span class="text-muted" style="grid-column:1/-1;">No slots configured.</span>';
             return;
         }
+
+        // If previously selected slot is already booked for this new date, deselect it
+        if (selectedSlot && takenSet.has(selectedSlot)) {
+            selectedSlot = '';
+            const hint = document.getElementById('apt-slot-hint');
+            if (hint) {
+                hint.textContent = 'The previously selected time slot is fully booked for this date. Please pick another time.';
+                hint.classList.add('apt-hint-error');
+            }
+        }
+
         slots.forEach((slot) => {
+            const isTaken = takenSet.has(slot);
+            const isSelected = selectedSlot === slot;
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'apt-slot' + (selectedSlot === slot ? ' is-selected' : '');
+            btn.className = 'apt-slot'
+                + (isTaken ? ' is-taken' : ' is-available')
+                + (isSelected ? ' is-selected' : '');
             btn.setAttribute('data-slot', slot);
-            btn.textContent = slot;
-            btn.addEventListener('click', () => {
-                selectedSlot = slot;
-                uiState.formDirty = true;
-                box.querySelectorAll('.apt-slot').forEach((b) => b.classList.remove('is-selected'));
-                btn.classList.add('is-selected');
-                const hint = document.getElementById('apt-slot-hint');
-                if (hint) { hint.textContent = 'Selected: ' + slot; hint.classList.remove('apt-hint-error'); }
-            });
+
+            if (isTaken) {
+                btn.disabled = true;
+                btn.setAttribute('aria-disabled', 'true');
+                btn.title = 'This time slot is fully booked for ' + selectedDate;
+                btn.innerHTML = `
+                    <span class="apt-slot-time">${escapeHtml(slot)}</span>
+                    <span class="apt-slot-badge badge-taken">Booked</span>
+                `;
+            } else {
+                btn.title = 'Click to select ' + slot;
+                btn.innerHTML = `
+                    <span class="apt-slot-time">${escapeHtml(slot)}</span>
+                    <span class="apt-slot-badge badge-available">${isSelected ? 'Selected' : 'Available'}</span>
+                `;
+                btn.addEventListener('click', () => {
+                    selectedSlot = slot;
+                    uiState.formDirty = true;
+                    box.querySelectorAll('.apt-slot').forEach((b) => {
+                        b.classList.remove('is-selected');
+                        const bBadge = b.querySelector('.badge-available');
+                        if (bBadge) bBadge.textContent = 'Available';
+                    });
+                    btn.classList.add('is-selected');
+                    const badge = btn.querySelector('.badge-available');
+                    if (badge) badge.textContent = 'Selected';
+                    const hint = document.getElementById('apt-slot-hint');
+                    if (hint) {
+                        hint.textContent = 'Selected: ' + slot;
+                        hint.classList.remove('apt-hint-error');
+                    }
+                });
+            }
+
             box.appendChild(btn);
         });
-        markTakenSlots();
     } catch (e) {
         box.innerHTML = '<span class="text-muted" style="grid-column:1/-1;">Failed to load slots.</span>';
     }
 }
 
 async function markTakenSlots() {
-    const box = document.getElementById('appointment-slots');
-    if (!box || !selectedDate) return;
-    try {
-        const res = await fetch('api.php?action=list_appointments');
-        const data = await res.json();
-        if (!data.success) return;
-        const mine = (data.data || []).filter((a) => a.appointment_date === selectedDate);
-        const taken = new Set(mine.map((a) => a.time_slot));
-        box.querySelectorAll('.apt-slot').forEach((b) => {
-            const slot = b.getAttribute('data-slot');
-            const isTaken = taken.has(slot);
-            b.disabled = isTaken;
-            b.title = isTaken ? 'Already booked on this date' : '';
-            if (selectedSlot === slot) {
-                b.classList.add('is-selected');
-            }
-        });
-    } catch (e) {
-        /* non-fatal; slots remain selectable */
-    }
+    await loadSlots();
 }
 
 async function loadAppointmentsTable() {

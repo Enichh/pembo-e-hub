@@ -34,7 +34,15 @@ class AppointmentController {
 
     public function getSlots(): void {
         AuthMiddleware::requireAuth();
-        Response::success("Available appointment slots.", $this->appointments->slots());
+        $date = isset($_GET['date']) ? trim((string) $_GET['date']) : '';
+        $allSlots = $this->appointments->slots();
+        $taken = ($date !== '') ? $this->appointments->getTakenSlots($date) : [];
+
+        Response::success("Available appointment slots.", [
+            'slots' => $allSlots,
+            'taken' => $taken,
+            'date'  => $date,
+        ]);
     }
 
     public function list(): void {
