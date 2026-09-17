@@ -25,6 +25,9 @@ class AppointmentsService {
         '15:00-16:00',
     ];
 
+    /** Default appointment capacity per time slot. */
+    public const DEFAULT_SLOT_CAPACITY = 10;
+
     private const ALLOWED_TRANSITIONS = ['CONFIRMED', 'CANCELLED', 'ATTENDED', 'NO_SHOW'];
 
     /**
@@ -37,41 +40,77 @@ class AppointmentsService {
     }
 
     /**
+     * Get detailed slot availability and capacity for a given date.
+     *
+     * @param string $date YYYY-MM-DD
+     * @param int $capacity Optional slot capacity limit (defaults to DEFAULT_SLOT_CAPACITY).
+     * @return array<int, array{slot: string, capacity: int, booked: int, remaining: int, is_full: bool, is_past: bool, is_available: bool}>
+     */
+    public function getSlotAvailability(string $date, int $capacity = self::DEFAULT_SLOT_CAPACITY): array {
+        $capacity = max(1, $capacity);
+        $stmt = $this->pdo->prepare("
+            SELECT time_slot, COUNT(*) as count
+            FROM appointments
+            WHERE appointment_date = :date
+              AND status NOT IN ('CANCELLED')
+            GROUP BY time_slot
+        ");
+        $stmt->execute([':date' => $date]);
+        $counts = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+
+        $tz = new DateTimeZone('Asia/Manila');
+        $now = new DateTime('now', $tz);
+        $todayYmd = $now->format('Y-m-d');
+        $isToday = ($date === $todayYmd);
+        $isPastDate = ($date < $todayYmd);
+
+        $slotsData = [];
+        foreach (self::SLOTS as $slot) {
+            $bookedCount = isset($counts[$slot]) ? (int) $counts[$slot] : 0;
+            $remaining = max(0, $capacity - $bookedCount);
+            $isFull = ($remaining === 0);
+
+            $isPast = false;
+            if ($isPastDate) {
+                $isPast = true;
+            } elseif ($isToday) {
+                $startTimeStr = trim(explode('-', $slot)[0]);
+                $slotStart = DateTime::createFromFormat('Y-m-d H:i', $date . ' ' . $startTimeStr, $tz);
+                if ($slotStart !== false && $slotStart <= $now) {
+                    $isPast = true;
+                }
+            }
+
+            $slotsData[] = [
+                'slot' => $slot,
+                'capacity' => $capacity,
+                'booked' => $bookedCount,
+                'remaining' => $remaining,
+                'is_full' => $isFull,
+                'is_past' => $isPast,
+                'is_available' => (!$isFull && !$isPast),
+            ];
+        }
+
+        return $slotsData;
+    }
+
+    /**
      * Get taken/booked appointment slots for a specific date across all residents.
-     * Automatically includes slots that have already passed in time if date is today.
+     * Automatically includes slots that have already passed in time or are fully booked.
      *
      * @param string $date YYYY-MM-DD
      * @return string[] List of time slot strings already booked or elapsed.
      */
     public function getTakenSlots(string $date): array {
-        $stmt = $this->pdo->prepare("
-            SELECT time_slot
-            FROM appointments
-            WHERE appointment_date = :date
-              AND status NOT IN ('CANCELLED')
-        ");
-        $stmt->execute([':date' => $date]);
-        $booked = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-        $tz = new DateTimeZone('Asia/Manila');
-        $now = new DateTime('now', $tz);
-        $todayYmd = $now->format('Y-m-d');
-
-        if ($date === $todayYmd) {
-            foreach (self::SLOTS as $slot) {
-                $startTimeStr = trim(explode('-', $slot)[0]);
-                $slotStart = DateTime::createFromFormat('Y-m-d H:i', $date . ' ' . $startTimeStr, $tz);
-                if ($slotStart !== false && $slotStart <= $now) {
-                    if (!in_array($slot, $booked, true)) {
-                        $booked[] = $slot;
-                    }
-                }
+        $slots = $this->getSlotAvailability($date);
+        $taken = [];
+        foreach ($slots as $s) {
+            if (!$s['is_available']) {
+                $taken[] = $s['slot'];
             }
-        } elseif ($date < $todayYmd) {
-            return self::SLOTS;
         }
-
-        return $booked;
+        return $taken;
     }
 
     private PDO $pdo;
@@ -123,6 +162,40 @@ class AppointmentsService {
             }
         }
 
+        // Prevent duplicate active booking by the same resident for the same date & time slot
+        $checkDup = $this->pdo->prepare("
+            SELECT id FROM appointments
+            WHERE resident_id = :resident_id
+              AND appointment_date = :date
+              AND time_slot = :time_slot
+              AND status NOT IN ('CANCELLED')
+            LIMIT 1
+        ");
+        $checkDup->execute([
+            ':resident_id' => $residentId,
+            ':date' => $date,
+            ':time_slot' => $timeSlot,
+        ]);
+        if ($checkDup->fetch()) {
+            throw new InvalidArgumentException('You already have an active appointment scheduled for this time slot.');
+        }
+
+        // Check overall capacity for this time slot
+        $countStmt = $this->pdo->prepare("
+            SELECT COUNT(*) FROM appointments
+            WHERE appointment_date = :date
+              AND time_slot = :time_slot
+              AND status NOT IN ('CANCELLED')
+        ");
+        $countStmt->execute([
+            ':date' => $date,
+            ':time_slot' => $timeSlot,
+        ]);
+        $activeBookings = (int) $countStmt->fetchColumn();
+        if ($activeBookings >= self::DEFAULT_SLOT_CAPACITY) {
+            throw new InvalidArgumentException('This appointment slot is fully booked for this date. Please choose another slot.');
+        }
+
         $id = Uuid::v4();
 
         try {
@@ -138,7 +211,7 @@ class AppointmentsService {
                 ':time_slot' => $timeSlot,
             ]);
         } catch (PDOException $e) {
-            // 1062 / SQLSTATE 23000 = duplicate key on uq_resident_slot.
+            // 1062 / SQLSTATE 23000 = duplicate key on uq_resident_slot if exists.
             if ((int)$e->getCode() === 1062 || $e->getCode() === '23000') {
                 throw new InvalidArgumentException('That appointment slot is already taken for this date. Please choose another slot.');
             }

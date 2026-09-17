@@ -365,13 +365,13 @@ async function loadSlots() {
         const res = await fetch('api.php?action=appointment_slots&date=' + encodeURIComponent(selectedDate));
         const data = await res.json();
         
-        let slots = [];
+        let rawSlots = [];
         let takenSet = new Set();
         if (data.success && data.data) {
             if (Array.isArray(data.data)) {
-                slots = data.data;
+                rawSlots = data.data;
             } else if (data.data.slots && Array.isArray(data.data.slots)) {
-                slots = data.data.slots;
+                rawSlots = data.data.slots;
                 if (Array.isArray(data.data.taken)) {
                     takenSet = new Set(data.data.taken);
                 }
@@ -379,82 +379,146 @@ async function loadSlots() {
         }
 
         box.innerHTML = '';
-        if (slots.length === 0) {
+        if (rawSlots.length === 0) {
             box.innerHTML = '<span class="text-muted" style="grid-column:1/-1;">No slots configured.</span>';
             return;
-        }
-
-        // If previously selected slot is already booked for this new date, deselect it
-        if (selectedSlot && takenSet.has(selectedSlot)) {
-            selectedSlot = '';
-            const hint = document.getElementById('apt-slot-hint');
-            if (hint) {
-                hint.textContent = 'The previously selected time slot is fully booked for this date. Please pick another time.';
-                hint.classList.add('apt-hint-error');
-            }
         }
 
         const now = today();
         const nowTime = new Date();
         const ymdToday = toYmd(now);
         const isToday = selectedDate === ymdToday;
+        const isPastDate = selectedDate < ymdToday;
 
-        slots.forEach((slot) => {
-            const isTaken = takenSet.has(slot);
-            let isPast = false;
-            if (isToday) {
-                const startTimeStr = slot.split('-')[0].trim();
+        const processedSlots = rawSlots.map((item) => {
+            if (typeof item === 'string') {
+                const isTaken = takenSet.has(item);
+                let isPast = isPastDate;
+                if (isToday) {
+                    const startTimeStr = item.split('-')[0].trim();
+                    const [h, m] = startTimeStr.split(':').map(Number);
+                    const slotTime = new Date();
+                    slotTime.setHours(h, m, 0, 0);
+                    if (slotTime <= nowTime) isPast = true;
+                }
+                return {
+                    slot: item,
+                    capacity: 10,
+                    booked: isTaken ? 10 : 0,
+                    remaining: isTaken ? 0 : 10,
+                    is_full: isTaken,
+                    is_past: isPast,
+                    is_available: !isTaken && !isPast,
+                };
+            }
+            // item is object from backend API
+            let isPast = Boolean(item.is_past) || isPastDate;
+            if (isToday && !isPast) {
+                const startTimeStr = item.slot.split('-')[0].trim();
                 const [h, m] = startTimeStr.split(':').map(Number);
                 const slotTime = new Date();
                 slotTime.setHours(h, m, 0, 0);
-                if (slotTime <= nowTime) {
-                    isPast = true;
-                }
-            } else if (selectedDate < ymdToday) {
-                isPast = true;
+                if (slotTime <= nowTime) isPast = true;
             }
+            const remaining = Number(item.remaining ?? 0);
+            const isFull = Boolean(item.is_full) || remaining <= 0;
+            return {
+                slot: item.slot,
+                capacity: Number(item.capacity ?? 10),
+                booked: Number(item.booked ?? 0),
+                remaining: remaining,
+                is_full: isFull,
+                is_past: isPast,
+                is_available: !isFull && !isPast,
+            };
+        });
 
-            const isUnavailable = isTaken || isPast;
+        // If previously selected slot is no longer available, clear selection
+        if (selectedSlot) {
+            const currentSelected = processedSlots.find(s => s.slot === selectedSlot);
+            if (!currentSelected || !currentSelected.is_available) {
+                selectedSlot = '';
+                const hint = document.getElementById('apt-slot-hint');
+                if (hint) {
+                    hint.textContent = 'The previously selected time slot is no longer available for this date. Please pick another time.';
+                    hint.classList.add('apt-hint-error');
+                }
+            }
+        }
+
+        const slotMap = new Map();
+        processedSlots.forEach(s => slotMap.set(s.slot, s));
+
+        processedSlots.forEach((slotData) => {
+            const { slot, capacity, remaining, is_full, is_past, is_available } = slotData;
             const isSelected = selectedSlot === slot;
+
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'apt-slot'
-                + (isUnavailable ? ' is-taken' : ' is-available')
-                + (isPast ? ' is-past' : '')
+                + (!is_available ? ' is-taken' : ' is-available')
+                + (is_past ? ' is-past' : '')
                 + (isSelected ? ' is-selected' : '');
             btn.setAttribute('data-slot', slot);
 
-            if (isUnavailable) {
+            if (!is_available) {
                 btn.disabled = true;
                 btn.setAttribute('aria-disabled', 'true');
-                const badgeText = isPast ? 'Passed' : 'Booked';
-                const badgeCls = isPast ? 'badge-passed' : 'badge-taken';
-                const tooltip = isPast ? 'This time slot has already passed for today' : ('This time slot is fully booked for ' + selectedDate);
+                const badgeText = is_past ? 'Passed' : 'Full';
+                const badgeCls = is_past ? 'badge-passed' : 'badge-taken';
+                const infoText = is_past ? 'Time elapsed' : '0 spots left';
+                const tooltip = is_past ? 'This time slot has already passed for today' : ('This time slot is full (' + capacity + '/' + capacity + ' booked)');
                 btn.title = tooltip;
                 btn.innerHTML = `
                     <span class="apt-slot-time">${escapeHtml(slot)}</span>
                     <span class="apt-slot-badge ${badgeCls}">${badgeText}</span>
+                    <span class="apt-slot-info">${infoText}</span>
                 `;
             } else {
-                btn.title = 'Click to select ' + slot;
+                let badgeText = '';
+                let badgeCls = '';
+                if (isSelected) {
+                    badgeText = 'Selected';
+                    badgeCls = 'badge-available';
+                } else if (remaining <= 3) {
+                    badgeText = `${remaining} left`;
+                    badgeCls = 'badge-limited';
+                } else {
+                    badgeText = `${remaining} spots`;
+                    badgeCls = 'badge-available';
+                }
+                const infoText = `${remaining} of ${capacity} spots`;
+                btn.title = `Click to select ${slot} (${remaining} of ${capacity} spots remaining)`;
                 btn.innerHTML = `
                     <span class="apt-slot-time">${escapeHtml(slot)}</span>
-                    <span class="apt-slot-badge badge-available">${isSelected ? 'Selected' : 'Available'}</span>
+                    <span class="apt-slot-badge ${badgeCls}">${badgeText}</span>
+                    <span class="apt-slot-info">${infoText}</span>
                 `;
+
                 btn.addEventListener('click', () => {
                     selectedSlot = slot;
                     uiState.formDirty = true;
                     box.querySelectorAll('.apt-slot').forEach((b) => {
                         b.classList.remove('is-selected');
-                        const bBadge = b.querySelector('.badge-available');
-                        if (bBadge) bBadge.textContent = 'Available';
+                        const bSlot = b.getAttribute('data-slot');
+                        const bData = slotMap.get(bSlot);
+                        if (bData && bData.is_available) {
+                            const bBadge = b.querySelector('.apt-slot-badge');
+                            if (bBadge) {
+                                bBadge.className = `apt-slot-badge ${bData.remaining <= 3 ? 'badge-limited' : 'badge-available'}`;
+                                bBadge.textContent = bData.remaining <= 3 ? `${bData.remaining} left` : `${bData.remaining} spots`;
+                            }
+                        }
                     });
                     btn.classList.add('is-selected');
-                    const badge = btn.querySelector('.badge-available');
-                    if (badge) badge.textContent = 'Selected';
+                    const badge = btn.querySelector('.apt-slot-badge');
+                    if (badge) {
+                        badge.className = 'apt-slot-badge badge-available';
+                        badge.textContent = 'Selected';
+                    }
                     const hint = document.getElementById('apt-slot-hint');
                     if (hint) {
-                        hint.textContent = 'Selected: ' + slot;
+                        hint.textContent = `Selected: ${slot} (${remaining} spots remaining)`;
                         hint.classList.remove('apt-hint-error');
                     }
                 });

@@ -22,27 +22,37 @@ class AppointmentsSliceTest {
     private array $staffUser;
     private array $residentA;
     private array $residentB;
+    private array $createdUserIds = [];
+
+    private string $testDate;
 
     public function __construct() {
         $this->pdo = Database::getConnection();
         $this->authService = new AuthService($this->pdo);
         $this->apptService = new AppointmentsService($this->pdo);
+        $this->testDate = date('Y-m-d', strtotime('+' . random_int(50, 250) . ' days'));
     }
 
     public function runAll(): void {
         echo "\n=== Running Slice 3: Appointments Test Suite ===\n\n";
 
-        $this->setupTestUsers();
-        $this->testAppointmentsTablePresent();
-        $this->testResidentBooksAppointment();
-        $this->testDuplicateSlotRejectedCleanly();
-        $this->testInvalidTimeSlotRejected();
-        $this->testPastDateRejected();
-        $this->testStaffListsAll();
-        $this->testResidentListsOwnOnly();
-        $this->testStatusUpdateByStaff();
-        $this->testCancellationRecordsReason();
-        $this->testAuditLogOnBooking();
+        try {
+            $this->setupTestUsers();
+            $this->testAppointmentsTablePresent();
+            $this->testSlotAvailabilityReturnsCapacity();
+            $this->testResidentBooksAppointment();
+            $this->testDuplicateSlotRejectedCleanly();
+            $this->testMultipleResidentsCanBookSameSlotWithinCapacity();
+            $this->testInvalidTimeSlotRejected();
+            $this->testPastDateRejected();
+            $this->testStaffListsAll();
+            $this->testResidentListsOwnOnly();
+            $this->testStatusUpdateByStaff();
+            $this->testCancellationRecordsReason();
+            $this->testAuditLogOnBooking();
+        } finally {
+            $this->tearDown();
+        }
 
         echo "\n=======================================================\n";
         echo "TEST SUMMARY: {$this->passed} Passed, {$this->failed} Failed\n";
@@ -64,7 +74,7 @@ class AppointmentsSliceTest {
     }
 
     private function tomorrow(): string {
-        return date('Y-m-d', strtotime('+1 day'));
+        return $this->testDate;
     }
 
     private function testableAuthService(): AuthService {
@@ -82,13 +92,11 @@ class AppointmentsSliceTest {
     }
 
     private function setupTestUsers(): void {
-        $this->staffUser = $this->authService->login('staff@pembo.gov.ph', 'Staff12345!');
+        $this->staffUser = $this->authService->login('admin@pembo.gov.ph', 'Admin12345!');
 
-        // Register fresh residents per run so re-running the suite on the same
-        // calendar day cannot trip the per-resident UNIQUE slot constraint.
         $testableAuth = $this->testableAuthService();
 
-        $emailA = 'appt_resident_a_' . time() . '@pembo.gov.ph';
+        $emailA = 'appt_resident_a_' . time() . '_' . random_int(1000, 9999) . '@pembo.gov.ph';
         $testableAuth->initiateRegistration($emailA, 'Resident12345!', [
             'first_name' => 'Appt',
             'last_name' => 'ResidentA',
@@ -98,8 +106,9 @@ class AppointmentsSliceTest {
             'street_address' => '123 Appt St',
         ]);
         $this->residentA = $testableAuth->verifyCode($emailA, $testableAuth->lastCode);
+        $this->createdUserIds[] = $this->residentA['id'];
 
-        $emailB = 'appt_resident_b_' . time() . '@pembo.gov.ph';
+        $emailB = 'appt_resident_b_' . time() . '_' . random_int(1000, 9999) . '@pembo.gov.ph';
         $testableAuth->initiateRegistration($emailB, 'Resident12345!', [
             'first_name' => 'Appt',
             'last_name' => 'ResidentB',
@@ -109,11 +118,29 @@ class AppointmentsSliceTest {
             'street_address' => '456 Appt St',
         ]);
         $this->residentB = $testableAuth->verifyCode($emailB, $testableAuth->lastCode);
+        $this->createdUserIds[] = $this->residentB['id'];
+    }
+
+    private function tearDown(): void {
+        if (!empty($this->createdUserIds)) {
+            $inClause = implode(',', array_fill(0, count($this->createdUserIds), '?'));
+            $this->pdo->prepare("DELETE FROM appointments WHERE resident_id IN ({$inClause})")->execute($this->createdUserIds);
+            $this->pdo->prepare("DELETE FROM resident_profiles WHERE user_id IN ({$inClause})")->execute($this->createdUserIds);
+            $this->pdo->prepare("DELETE FROM users WHERE id IN ({$inClause})")->execute($this->createdUserIds);
+        }
     }
 
     private function testAppointmentsTablePresent(): void {
         $stmt = $this->pdo->query("SELECT 1 FROM appointments LIMIT 0");
         $this->assert($stmt !== false, "appointments table is queryable");
+    }
+
+    private function testSlotAvailabilityReturnsCapacity(): void {
+        $slots = $this->apptService->getSlotAvailability($this->tomorrow());
+        $this->assert(count($slots) === count(AppointmentsService::SLOTS), "getSlotAvailability returns all time windows");
+        $first = $slots[0];
+        $this->assert(isset($first['capacity']) && $first['capacity'] === AppointmentsService::DEFAULT_SLOT_CAPACITY, "Slot includes DEFAULT_SLOT_CAPACITY");
+        $this->assert(isset($first['remaining']) && $first['remaining'] === $first['capacity'], "Initial slot remaining equals capacity");
     }
 
     private function testResidentBooksAppointment(): void {
@@ -129,7 +156,7 @@ class AppointmentsSliceTest {
     }
 
     private function testDuplicateSlotRejectedCleanly(): void {
-        // Resident A books the same date+slot a second time -> must be a clean domain error.
+        // Resident A books the same date+slot a second time -> must be rejected cleanly.
         $blocked = false;
         try {
             $this->apptService->book(
@@ -139,24 +166,37 @@ class AppointmentsSliceTest {
                 '09:00-10:00'
             );
         } catch (InvalidArgumentException $e) {
-            $blocked = str_contains(strtolower($e->getMessage()), 'slot');
+            $blocked = str_contains(strtolower($e->getMessage()), 'appointment') || str_contains(strtolower($e->getMessage()), 'slot');
         }
-        $this->assert($blocked, "Duplicate resident/date/slot rejected with a clean 'slot taken' message");
+        $this->assert($blocked, "Duplicate resident/date/slot rejected with a clean message");
+    }
 
-        // A DIFFERENT resident may still book the same date/slot (uniqueness is per resident).
+    private function testMultipleResidentsCanBookSameSlotWithinCapacity(): void {
+        // Resident B books the same date/slot -> allowed because multi-capacity quota is in place.
         $ok = false;
         try {
-            $this->apptService->book(
+            $appt = $this->apptService->book(
                 $this->residentB['id'],
                 'Different person booking',
                 $this->tomorrow(),
                 '09:00-10:00'
             );
-            $ok = true;
+            $ok = !empty($appt['id']);
         } catch (InvalidArgumentException $e) {
             $ok = false;
         }
-        $this->assert($ok, "Another resident can book the same date/time slot");
+        $this->assert($ok, "Multiple constituents can book within the slot capacity");
+
+        // Verify remaining count decrements properly
+        $slots = $this->apptService->getSlotAvailability($this->tomorrow());
+        $slot09 = null;
+        foreach ($slots as $s) {
+            if ($s['slot'] === '09:00-10:00') {
+                $slot09 = $s;
+                break;
+            }
+        }
+        $this->assert($slot09 !== null && $slot09['booked'] === 2 && $slot09['remaining'] === (AppointmentsService::DEFAULT_SLOT_CAPACITY - 2), "Slot booked count is 2 and remaining is capacity - 2");
     }
 
     private function testInvalidTimeSlotRejected(): void {
@@ -191,11 +231,11 @@ class AppointmentsSliceTest {
 
     private function testStaffListsAll(): void {
         $all = $this->apptService->list($this->staffUser, $this->tomorrow());
-        $this->assert(count($all) >= 1, "Staff can list appointments for a date");
+        $this->assert(count($all) >= 2, "Staff can list appointments for a date");
     }
 
     private function testResidentListsOwnOnly(): void {
-        // Resident A (fresh per run) only sees rows they own — never other residents'.
+        // Resident A only sees rows they own — never other residents'.
         $residentAList = $this->apptService->list($this->residentA, null);
         foreach ($residentAList as $appt) {
             $this->assert($appt['resident_id'] === $this->residentA['id'], "Resident only sees their own appointments");

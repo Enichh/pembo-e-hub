@@ -339,6 +339,11 @@
     color: #15803d;
 }
 
+.apt-slot-badge.badge-limited {
+    background: #fef3c7;
+    color: #b45309;
+}
+
 .apt-slot-badge.badge-taken {
     background: #fee2e2;
     color: #b91c1c;
@@ -349,9 +354,21 @@
     color: #64748b;
 }
 
-.apt-slot.is-selected .apt-slot-badge.badge-available {
+.apt-slot-info {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--apt-muted);
+    line-height: 1.1;
+}
+
+.apt-slot.is-selected .apt-slot-badge.badge-available,
+.apt-slot.is-selected .apt-slot-badge.badge-limited {
     background: rgba(255, 255, 255, 0.25);
     color: #ffffff;
+}
+
+.apt-slot.is-selected .apt-slot-info {
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .apt-hint { font-size: 0.78rem; color: var(--apt-muted); margin-top: 6px; }

@@ -36,13 +36,37 @@ class AppointmentController {
         AuthMiddleware::requireAuth();
         $date = isset($_GET['date']) ? trim((string) $_GET['date']) : '';
         $allSlots = $this->appointments->slots();
-        $taken = ($date !== '') ? $this->appointments->getTakenSlots($date) : [];
 
-        Response::success("Available appointment slots.", [
-            'slots' => $allSlots,
-            'taken' => $taken,
-            'date'  => $date,
-        ]);
+        if ($date !== '') {
+            $slotDetails = $this->appointments->getSlotAvailability($date);
+            $taken = [];
+            foreach ($slotDetails as $s) {
+                if (!$s['is_available']) {
+                    $taken[] = $s['slot'];
+                }
+            }
+            Response::success("Available appointment slots.", [
+                'date'     => $date,
+                'capacity' => AppointmentsService::DEFAULT_SLOT_CAPACITY,
+                'slots'    => $slotDetails,
+                'taken'    => $taken,
+            ]);
+        } else {
+            Response::success("Available appointment slots.", [
+                'date'     => '',
+                'capacity' => AppointmentsService::DEFAULT_SLOT_CAPACITY,
+                'slots'    => array_map(fn(string $s) => [
+                    'slot'         => $s,
+                    'capacity'     => AppointmentsService::DEFAULT_SLOT_CAPACITY,
+                    'booked'       => 0,
+                    'remaining'    => AppointmentsService::DEFAULT_SLOT_CAPACITY,
+                    'is_full'      => false,
+                    'is_past'      => false,
+                    'is_available' => true,
+                ], $allSlots),
+                'taken'    => [],
+            ]);
+        }
     }
 
     public function list(): void {
