@@ -68,7 +68,7 @@
                 <form id="register-form" class="auth-form" novalidate>
                     <div class="form-row" style="grid-template-columns: 1fr 1fr;">
                         <div class="form-group">
-                            <label for="reg-first-name">First name</label>
+                            <label for="reg-first-name">First name <span class="req">*</span></label>
                             <input type="text" id="reg-first-name" class="field" autocomplete="given-name"
                                    placeholder="Juan" maxlength="100" aria-describedby="reg-first-name-hint">
                             <p id="reg-first-name-hint" class="field-hint"></p>
@@ -81,7 +81,7 @@
                     </div>
                     <div class="form-row" style="grid-template-columns: 1fr 1fr;">
                         <div class="form-group">
-                            <label for="reg-last-name">Last name</label>
+                            <label for="reg-last-name">Last name <span class="req">*</span></label>
                             <input type="text" id="reg-last-name" class="field" autocomplete="family-name"
                                    placeholder="Dela Cruz" maxlength="100" aria-describedby="reg-last-name-hint">
                             <p id="reg-last-name-hint" class="field-hint"></p>
@@ -92,7 +92,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="reg-email">Email address</label>
+                        <label for="reg-email">Email address <span class="req">*</span></label>
                         <input type="email" id="reg-email" class="field" autocomplete="email"
                                placeholder="your.email@example.com" inputmode="email" maxlength="254"
                                aria-describedby="reg-email-hint">
@@ -100,7 +100,7 @@
                     </div>
                     <div class="form-row" style="grid-template-columns: 1fr 1fr;">
                         <div class="form-group">
-                            <label for="reg-password">Password</label>
+                            <label for="reg-password">Password <span class="req">*</span></label>
                             <div class="password-wrap">
                                 <input type="password" id="reg-password" class="field" autocomplete="new-password"
                                        placeholder="Create a password" aria-describedby="reg-password-hint">
@@ -114,7 +114,7 @@
                             </ul>
                         </div>
                         <div class="form-group">
-                            <label for="reg-confirm-password">Confirm password</label>
+                            <label for="reg-confirm-password">Confirm password <span class="req">*</span></label>
                             <div class="password-wrap">
                                 <input type="password" id="reg-confirm-password" class="field" autocomplete="new-password"
                                        placeholder="Re-type password" aria-describedby="reg-confirm-password-hint">
@@ -127,7 +127,7 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <span class="field-label">Gender</span>
+                        <span class="field-label">Gender <span class="req">*</span></span>
                         <div class="radio-group" role="radiogroup" aria-label="Gender" aria-describedby="reg-gender-hint">
                             <label class="radio-pill">
                                 <input type="radio" name="reg-gender" value="Male">
@@ -145,14 +145,14 @@
                         <p id="reg-gender-hint" class="field-hint"></p>
                     </div>
                     <div class="form-group">
-                        <span class="field-label">Birthdate</span>
+                        <span class="field-label">Birthdate <span class="req">*</span></span>
                         <div id="reg-birthdate-calendar" class="bd-calendar" role="application" aria-label="Choose your birthdate"></div>
                         <input type="hidden" id="reg-birthdate" autocomplete="bday" aria-describedby="reg-birthdate-hint">
                         <p id="reg-birthdate-hint" class="field-hint"></p>
                     </div>
                     <div class="form-row" style="grid-template-columns: 1fr;">
                         <div class="form-group">
-                            <label for="reg-civil-status">Civil status</label>
+                            <label for="reg-civil-status">Civil status <span class="req">*</span></label>
                             <select id="reg-civil-status" class="field" aria-describedby="reg-civil-status-hint">
                                 <option value="">Select status</option>
                                 <option value="Single">Single</option>
@@ -165,14 +165,14 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="reg-street-address">Complete Pembo address</label>
+                        <label for="reg-street-address">Complete Pembo address <span class="req">*</span></label>
                         <textarea id="reg-street-address" class="field" rows="2"
                                   placeholder="Street, Pembo, Taguig City 1642" maxlength="500"
                                   aria-describedby="reg-street-address-hint"></textarea>
                         <p id="reg-street-address-hint" class="field-hint"></p>
                     </div>
                     <div class="form-group">
-                        <label for="reg-valid-id">Valid ID Proof (showing Pembo Address) *</label>
+                        <label for="reg-valid-id">Valid ID Proof (showing Pembo Address) <span class="req">*</span></label>
                         <div class="reg-dropzone" id="reg-dropzone" role="button" tabindex="0" aria-label="Upload valid ID">
                             <span class="reg-dropzone-icon" aria-hidden="true">
                                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -187,7 +187,7 @@
                     <div class="form-group form-group-consent">
                         <label class="checkbox-label" for="reg-agree">
                             <input type="checkbox" id="reg-agree" name="reg-agree" value="1" aria-describedby="reg-agree-hint">
-                            <span class="checkbox-text">I agree to the collection and processing of my personal information to verify my Pembo residency, per the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>.</span>
+                            <span class="checkbox-text">I agree to the collection and processing of my personal information to verify my Pembo residency, per the <strong>Data Privacy Act of 2012 (R.A. 10173)</strong>. <span class="req">*</span></span>
                         </label>
                         <p id="reg-agree-hint" class="field-hint"></p>
                     </div>

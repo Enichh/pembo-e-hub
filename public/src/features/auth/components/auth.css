@@ -147,6 +147,12 @@
     opacity: 0.85;
 }
 
+.req {
+    color: #ef4444;
+    font-weight: 700;
+    margin-left: 2px;
+}
+
 .field-label {
     display: block;
     font-size: 0.82rem;
