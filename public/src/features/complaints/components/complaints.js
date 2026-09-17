@@ -102,12 +102,12 @@ function renderResidentForm() {
                     </div>
                     <div class="form-group full">
                         <label for="cmp-incident-location">Where did it happen? *</label>
-                        <input type="text" id="cmp-incident-location" class="form-control" placeholder="e.g. Block 4, Sampaguita St." required>
+                        <input type="text" id="cmp-incident-location" class="form-control" placeholder="e.g. Block 4, Sampaguita St." maxlength="500" required>
                         <p class="field-hint" id="cmp-incident-location-hint"></p>
                     </div>
                     <div class="form-group full">
                         <label for="cmp-narrative">What happened? *</label>
-                        <textarea id="cmp-narrative" class="form-control" rows="4" placeholder="Describe the incident in your own words." required></textarea>
+                        <textarea id="cmp-narrative" class="form-control" rows="4" placeholder="Describe the incident in your own words." maxlength="2000" required></textarea>
                         <p class="field-hint" id="cmp-narrative-hint"></p>
                     </div>
                 </div>
@@ -214,12 +214,18 @@ function validateComplaintForm() {
     if (!location.value.trim()) {
         setFieldError(location, document.getElementById('cmp-incident-location-hint'), 'Incident location is required.');
         valid = false;
+    } else if (location.value.trim().length > 500) {
+        setFieldError(location, document.getElementById('cmp-incident-location-hint'), 'Incident location must be 500 characters or fewer.');
+        valid = false;
     } else {
         clearFieldError(location, document.getElementById('cmp-incident-location-hint'));
     }
 
     if (!narrative.value.trim()) {
         setFieldError(narrative, document.getElementById('cmp-narrative-hint'), 'Please describe what happened.');
+        valid = false;
+    } else if (narrative.value.trim().length > 2000) {
+        setFieldError(narrative, document.getElementById('cmp-narrative-hint'), 'Complaint details must be 2000 characters or fewer.');
         valid = false;
     } else {
         clearFieldError(narrative, document.getElementById('cmp-narrative-hint'));

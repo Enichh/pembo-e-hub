@@ -85,8 +85,20 @@ class ProfileService
         if ($firstName === '') {
             throw new InvalidArgumentException('First name is required.');
         }
+        if (mb_strlen($firstName) > 100) {
+            throw new InvalidArgumentException('First name must be 100 characters or fewer.');
+        }
         if ($lastName === '') {
             throw new InvalidArgumentException('Last name is required.');
+        }
+        if (mb_strlen($lastName) > 100) {
+            throw new InvalidArgumentException('Last name must be 100 characters or fewer.');
+        }
+        if ($middleName !== '' && mb_strlen($middleName) > 100) {
+            throw new InvalidArgumentException('Middle name must be 100 characters or fewer.');
+        }
+        if ($suffix !== '' && mb_strlen($suffix) > 20) {
+            throw new InvalidArgumentException('Suffix must be 20 characters or fewer.');
         }
         if ($birthdate === '') {
             throw new InvalidArgumentException('Birthdate is required.');
@@ -104,11 +116,14 @@ class ProfileService
         if (!in_array($civilStatus, self::ALLOWED_CIVIL_STATUS, true)) {
             throw new InvalidArgumentException('Please select a valid civil status.');
         }
-        if ($contactNumber !== '' && !preg_match('/^[0-9+\-\s()]{7,20}$/', $contactNumber)) {
-            throw new InvalidArgumentException('Contact number contains invalid characters.');
+        if ($contactNumber !== '' && !preg_match('/^(09|\+639)\d{9}$/', $contactNumber)) {
+            throw new InvalidArgumentException('Please enter a valid Philippine mobile number (e.g. 09397325776).');
         }
         if ($streetAddress === '') {
             throw new InvalidArgumentException('Complete address is required.');
+        }
+        if (mb_strlen($streetAddress) > 500) {
+            throw new InvalidArgumentException('Complete address must be 500 characters or fewer.');
         }
 
         $stmt = $this->pdo->prepare('

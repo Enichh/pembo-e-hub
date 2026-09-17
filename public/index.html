@@ -42,7 +42,7 @@
                     <div class="form-group">
                         <label for="login-email">Email address</label>
                         <input type="email" id="login-email" class="field" autocomplete="email"
-                               placeholder="name@pembo.gov.ph" inputmode="email"
+                               placeholder="name@pembo.gov.ph" inputmode="email" maxlength="254"
                                aria-describedby="login-email-hint">
                         <p id="login-email-hint" class="field-hint">Enter a valid email address.</p>
                     </div>
@@ -70,31 +70,31 @@
                         <div class="form-group">
                             <label for="reg-first-name">First name</label>
                             <input type="text" id="reg-first-name" class="field" autocomplete="given-name"
-                                   placeholder="Juan" aria-describedby="reg-first-name-hint">
+                                   placeholder="Juan" maxlength="100" aria-describedby="reg-first-name-hint">
                             <p id="reg-first-name-hint" class="field-hint"></p>
                         </div>
                         <div class="form-group">
                             <label for="reg-middle-name">Middle name <span class="opt">(optional)</span></label>
                             <input type="text" id="reg-middle-name" class="field" autocomplete="additional-name"
-                                   placeholder="Procopio">
+                                   placeholder="Procopio" maxlength="100">
                         </div>
                     </div>
                     <div class="form-row" style="grid-template-columns: 1fr 1fr;">
                         <div class="form-group">
                             <label for="reg-last-name">Last name</label>
                             <input type="text" id="reg-last-name" class="field" autocomplete="family-name"
-                                   placeholder="Dela Cruz" aria-describedby="reg-last-name-hint">
+                                   placeholder="Dela Cruz" maxlength="100" aria-describedby="reg-last-name-hint">
                             <p id="reg-last-name-hint" class="field-hint"></p>
                         </div>
                         <div class="form-group">
                             <label for="reg-suffix">Suffix <span class="opt">(optional)</span></label>
-                            <input type="text" id="reg-suffix" class="field" placeholder="Jr., Sr., III">
+                            <input type="text" id="reg-suffix" class="field" placeholder="Jr., Sr., III" maxlength="20">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="reg-email">Email address</label>
                         <input type="email" id="reg-email" class="field" autocomplete="email"
-                               placeholder="your.email@example.com" inputmode="email"
+                               placeholder="your.email@example.com" inputmode="email" maxlength="254"
                                aria-describedby="reg-email-hint">
                         <p id="reg-email-hint" class="field-hint">Enter a valid email address.</p>
                     </div>
@@ -167,7 +167,7 @@
                     <div class="form-group">
                         <label for="reg-street-address">Complete Pembo address</label>
                         <textarea id="reg-street-address" class="field" rows="2"
-                                  placeholder="Street, Pembo, Taguig City 1642"
+                                  placeholder="Street, Pembo, Taguig City 1642" maxlength="500"
                                   aria-describedby="reg-street-address-hint"></textarea>
                         <p id="reg-street-address-hint" class="field-hint"></p>
                     </div>

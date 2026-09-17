@@ -141,6 +141,7 @@ function buildEmailPhase(body) {
     input.autocomplete = 'email';
     input.placeholder = 'name@pembo.gov.ph';
     input.inputMode = 'email';
+    input.maxLength = 254;
 
     const hint = document.createElement('p');
     hint.id = 'reset-email-hint';
@@ -392,6 +393,10 @@ async function submitEmail() {
     const email = input.value.trim();
     if (!email) {
         setFieldError(input, hint, 'Email is required.');
+        return;
+    }
+    if (email.length > 254) {
+        setFieldError(input, hint, 'Email must be 254 characters or fewer.');
         return;
     }
     if (!EMAIL_RE.test(email)) {

@@ -142,9 +142,9 @@ function openRegisterAssetModal() {
             </div>
             <form id="form-register-asset">
                 <div class="admin-modal-body">
-                    <div class="form-group"><label>Item Name *</label><input type="text" id="asset-name" class="form-control" required placeholder="e.g. Emergency Rescue Tent 10x10"></div>
+                    <div class="form-group"><label>Item Name *</label><input type="text" id="asset-name" class="form-control" required placeholder="e.g. Emergency Rescue Tent 10x10" maxlength="150"></div>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-                        <div class="form-group"><label>Category *</label><input type="text" id="asset-category" class="form-control" required placeholder="e.g. Emergency & Relief"></div>
+                        <div class="form-group"><label>Category *</label><input type="text" id="asset-category" class="form-control" required placeholder="e.g. Emergency & Relief" maxlength="100"></div>
                         <div class="form-group"><label>Total Quantity *</label><input type="number" id="asset-qty" class="form-control" required min="1" value="1"></div>
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
@@ -154,7 +154,7 @@ function openRegisterAssetModal() {
                                 <option value="GOOD">GOOD</option><option value="NEW">NEW</option><option value="FAIR">FAIR</option><option value="DAMAGED">DAMAGED</option><option value="UNDER_MAINTENANCE">UNDER_MAINTENANCE</option>
                             </select>
                         </div>
-                        <div class="form-group"><label>Storage Location *</label><input type="text" id="asset-location" class="form-control" required placeholder="e.g. Supply Room B, 2nd Floor"></div>
+                        <div class="form-group"><label>Storage Location *</label><input type="text" id="asset-location" class="form-control" required placeholder="e.g. Supply Room B, 2nd Floor" maxlength="150"></div>
                     </div>
                 </div>
                 <div class="admin-modal-foot">
@@ -174,12 +174,29 @@ function openRegisterAssetModal() {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = form.querySelector('button[type="submit"]');
+        const name = document.getElementById('asset-name').value.trim();
+        const category = document.getElementById('asset-category').value.trim();
+        const location = document.getElementById('asset-location').value.trim();
+
+        if (name.length > 150) {
+            toast('error', 'Item name must be 150 characters or fewer.');
+            return;
+        }
+        if (category.length > 100) {
+            toast('error', 'Category must be 100 characters or fewer.');
+            return;
+        }
+        if (location.length > 150) {
+            toast('error', 'Storage location must be 150 characters or fewer.');
+            return;
+        }
+
         const payload = {
-            name: document.getElementById('asset-name').value.trim(),
-            category: document.getElementById('asset-category').value.trim(),
+            name: name,
+            category: category,
             total_quantity: Number(document.getElementById('asset-qty').value),
-            storage_location: document.getElementById('asset-location').value.trim(),
             item_condition: document.getElementById('asset-condition').value,
+            storage_location: location,
         };
         try {
             const res = await window.PemboButton.loading(btn, () => post('create_asset', payload), { loadingLabel: 'Saving…' });
@@ -212,13 +229,17 @@ function openIssueAssetModal(assetId, assetName) {
             </div>
             <form id="form-issue-asset">
                 <div class="admin-modal-body">
-                    <div class="form-group"><label>Borrower Full Name *</label><input type="text" id="issue-borrower" class="form-control" required placeholder="e.g. Juan Dela Cruz"></div>
-                    <div class="form-group"><label>Borrower Contact Number *</label><input type="text" id="issue-contact" class="form-control" required placeholder="e.g. 09171234567"></div>
+                    <div class="form-group"><label>Borrower Full Name *</label><input type="text" id="issue-borrower" class="form-control" required placeholder="e.g. Juan Dela Cruz" maxlength="150"></div>
+                    <div class="form-group">
+                        <label>Borrower Contact Number *</label>
+                        <input type="tel" id="issue-contact" class="form-control" required placeholder="09397325776" inputmode="tel" maxlength="13">
+                        <p class="field-hint" style="margin-top:4px;font-size:12px;color:var(--admin-muted,#64748b)">Format: 09XXXXXXXXX (11 digits, e.g. 09397325776)</p>
+                    </div>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                         <div class="form-group"><label>Quantity to Borrow *</label><input type="number" id="issue-qty" class="form-control" required min="1" value="1"></div>
                         <div class="form-group"><label>Expected Return Date *</label><input type="date" id="issue-return-date" class="form-control" required></div>
                     </div>
-                    <div class="form-group"><label>Remarks / Purpose</label><textarea id="issue-remarks" class="form-control" rows="2" placeholder="e.g. Community Event at Zone 3 Plaza"></textarea></div>
+                    <div class="form-group"><label>Remarks / Purpose</label><textarea id="issue-remarks" class="form-control" rows="2" placeholder="e.g. Community Event at Zone 3 Plaza" maxlength="500"></textarea></div>
                 </div>
                 <div class="admin-modal-foot">
                     <button type="button" class="btn btn-secondary btn-close-modal">Cancel</button>
@@ -237,13 +258,30 @@ function openIssueAssetModal(assetId, assetName) {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = form.querySelector('button[type="submit"]');
+        const borrowerName = document.getElementById('issue-borrower').value.trim();
+        const borrowerContact = document.getElementById('issue-contact').value.trim();
+        const remarks = document.getElementById('issue-remarks').value.trim();
+
+        if (borrowerName.length > 150) {
+            toast('error', 'Borrower name must be 150 characters or fewer.');
+            return;
+        }
+        if (borrowerContact.length > 13 || !/^(09|\+639)\d{9}$/.test(borrowerContact)) {
+            toast('error', 'Please enter a valid Philippine mobile number (e.g. 09397325776).');
+            return;
+        }
+        if (remarks.length > 500) {
+            toast('error', 'Remarks must be 500 characters or fewer.');
+            return;
+        }
+
         const payload = {
             asset_id: assetId,
-            borrower_name: document.getElementById('issue-borrower').value.trim(),
-            borrower_contact: document.getElementById('issue-contact').value.trim(),
+            borrower_name: borrowerName,
+            borrower_contact: borrowerContact,
             quantity_borrowed: Number(document.getElementById('issue-qty').value),
             expected_return_date: document.getElementById('issue-return-date').value,
-            remarks: document.getElementById('issue-remarks').value.trim(),
+            remarks: remarks,
         };
         try {
             const res = await window.PemboButton.loading(btn, () => post('issue_asset', payload), { loadingLabel: 'Issuing…' });

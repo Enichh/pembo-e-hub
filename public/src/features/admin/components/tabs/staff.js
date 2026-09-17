@@ -163,16 +163,16 @@ function openCreateStaffModal() {
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                         <div class="form-group">
                             <label for="prov-first-name">First Name *</label>
-                            <input type="text" id="prov-first-name" class="form-control" required placeholder="e.g. Maria">
+                            <input type="text" id="prov-first-name" class="form-control" required placeholder="e.g. Maria" maxlength="100">
                         </div>
                         <div class="form-group">
                             <label for="prov-last-name">Last Name *</label>
-                            <input type="text" id="prov-last-name" class="form-control" required placeholder="e.g. Santos">
+                            <input type="text" id="prov-last-name" class="form-control" required placeholder="e.g. Santos" maxlength="100">
                         </div>
                     </div>
                     <div class="form-group">
                         <label for="prov-email">Staff Work Email *</label>
-                        <input type="email" id="prov-email" class="form-control" required placeholder="e.g. m.santos@pembo.gov.ph">
+                        <input type="email" id="prov-email" class="form-control" required placeholder="e.g. m.santos@pembo.gov.ph" maxlength="254">
                     </div>
                     <div class="form-group">
                         <label for="prov-password">Initial Password * (min 8 characters)</label>
@@ -181,11 +181,11 @@ function openCreateStaffModal() {
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                         <div class="form-group">
                             <label for="prov-dept">Department *</label>
-                            <input type="text" id="prov-dept" class="form-control" required placeholder="e.g. Administrative Services">
+                            <input type="text" id="prov-dept" class="form-control" required placeholder="e.g. Administrative Services" maxlength="100">
                         </div>
                         <div class="form-group">
                             <label for="prov-position">Position / Title *</label>
-                            <input type="text" id="prov-position" class="form-control" required placeholder="e.g. Document Verification Officer">
+                            <input type="text" id="prov-position" class="form-control" required placeholder="e.g. Document Verification Officer" maxlength="100">
                         </div>
                     </div>
                 </div>
@@ -208,13 +208,33 @@ function openCreateStaffModal() {
         e.preventDefault();
         const btn = document.getElementById('btn-submit-provision');
 
+        const firstName = document.getElementById('prov-first-name').value.trim();
+        const lastName = document.getElementById('prov-last-name').value.trim();
+        const email = document.getElementById('prov-email').value.trim();
+        const password = document.getElementById('prov-password').value;
+        const department = document.getElementById('prov-dept').value.trim();
+        const position = document.getElementById('prov-position').value.trim();
+
+        if (firstName.length > 100 || lastName.length > 100) {
+            toast('error', 'First and last name must be 100 characters or fewer.');
+            return;
+        }
+        if (email.length > 254) {
+            toast('error', 'Email must be 254 characters or fewer.');
+            return;
+        }
+        if (department.length > 100 || position.length > 100) {
+            toast('error', 'Department and position must be 100 characters or fewer.');
+            return;
+        }
+
         const payload = {
-            first_name: document.getElementById('prov-first-name').value.trim(),
-            last_name: document.getElementById('prov-last-name').value.trim(),
-            email: document.getElementById('prov-email').value.trim(),
-            password: document.getElementById('prov-password').value,
-            department: document.getElementById('prov-dept').value.trim(),
-            position: document.getElementById('prov-position').value.trim(),
+            first_name: firstName,
+            last_name: lastName,
+            email: email,
+            password: password,
+            department: department,
+            position: position,
         };
 
         try {

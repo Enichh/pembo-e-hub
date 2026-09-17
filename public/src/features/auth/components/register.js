@@ -107,13 +107,31 @@ function renderBirthdateCalendar() {
 }
 
 /**
+ * Validates field character length limits.
+ * @param {HTMLInputElement|HTMLTextAreaElement} input - Target input element.
+ * @param {HTMLElement|null} hintEl - Field hint element.
+ * @param {number} max - Maximum character length.
+ * @param {string} label - Field display label.
+ * @returns {boolean} True if length is within limits.
+ */
+function checkLength(input, hintEl, max, label) {
+    if (input && input.value && input.value.length > max) {
+        setFieldError(input, hintEl, `${label} must be ${max} characters or fewer.`);
+        return false;
+    }
+    return true;
+}
+
+/**
  * Validates full registration form input values.
  * @returns {boolean} True if all inputs pass validation rules.
  */
 function validateRegisterForm() {
     const f = (id) => document.getElementById(id);
     const first = f('reg-first-name');
+    const middle = f('reg-middle-name');
     const last = f('reg-last-name');
+    const suffix = f('reg-suffix');
     const email = f('reg-email');
     const pass = f('reg-password');
     const confirm = f('reg-confirm-password');
@@ -135,19 +153,33 @@ function validateRegisterForm() {
     if (!first.value.trim()) {
         setFieldError(first, firstHint, 'First name is required.');
         valid = false;
+    } else if (!checkLength(first, firstHint, 100, 'First name')) {
+        valid = false;
     } else {
         clearFieldError(first, firstHint);
+    }
+
+    if (middle && middle.value.trim() && !checkLength(middle, null, 100, 'Middle name')) {
+        valid = false;
     }
 
     if (!last.value.trim()) {
         setFieldError(last, lastHint, 'Last name is required.');
         valid = false;
+    } else if (!checkLength(last, lastHint, 100, 'Last name')) {
+        valid = false;
     } else {
         clearFieldError(last, lastHint);
     }
 
+    if (suffix && suffix.value.trim() && !checkLength(suffix, null, 20, 'Suffix')) {
+        valid = false;
+    }
+
     if (!email.value.trim() || !EMAIL_RE.test(email.value.trim())) {
         setFieldError(email, emailHint, 'Valid email address is required.');
+        valid = false;
+    } else if (!checkLength(email, emailHint, 254, 'Email address')) {
         valid = false;
     } else {
         clearFieldError(email, emailHint);
@@ -192,6 +224,8 @@ function validateRegisterForm() {
 
     if (!address.value.trim()) {
         setFieldError(address, addressHint, 'Complete address is required.');
+        valid = false;
+    } else if (!checkLength(address, addressHint, 500, 'Complete address')) {
         valid = false;
     } else {
         clearFieldError(address, addressHint);

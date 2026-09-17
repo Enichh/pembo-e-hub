@@ -58,7 +58,7 @@ class AuthService {
     public function initiateRegistration(string $email, string $password, array $profile = [], ?string $idDocumentPath = null): array {
 
         $email = trim(filter_var($email, FILTER_SANITIZE_EMAIL));
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($email === '' || mb_strlen($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException("Please provide a valid email address.");
         }
 
@@ -550,8 +550,20 @@ class AuthService {
         if ($firstName === '') {
             throw new InvalidArgumentException("First name is required.");
         }
+        if (mb_strlen($firstName) > 100) {
+            throw new InvalidArgumentException("First name must be 100 characters or fewer.");
+        }
         if ($lastName === '') {
             throw new InvalidArgumentException("Last name is required.");
+        }
+        if (mb_strlen($lastName) > 100) {
+            throw new InvalidArgumentException("Last name must be 100 characters or fewer.");
+        }
+        if ($middleName !== '' && mb_strlen($middleName) > 100) {
+            throw new InvalidArgumentException("Middle name must be 100 characters or fewer.");
+        }
+        if ($suffix !== '' && mb_strlen($suffix) > 20) {
+            throw new InvalidArgumentException("Suffix must be 20 characters or fewer.");
         }
         if ($birthdate === '') {
             throw new InvalidArgumentException("Birthdate is required.");
@@ -590,6 +602,9 @@ class AuthService {
         }
         if ($streetAddress === '') {
             throw new InvalidArgumentException("Complete address is required.");
+        }
+        if (mb_strlen($streetAddress) > 500) {
+            throw new InvalidArgumentException("Complete address must be 500 characters or fewer.");
         }
 
         return [$firstName, $middleName, $lastName, $suffix, $birthdate, $gender, $civilStatus, $streetAddress];

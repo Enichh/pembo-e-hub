@@ -110,7 +110,7 @@ class AdminService {
         ?string $adminUserId = null
     ): array {
         $email = trim(filter_var($email, FILTER_SANITIZE_EMAIL));
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($email === '' || mb_strlen($email) > 254 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new InvalidArgumentException("Please provide a valid email address.");
         }
 
@@ -125,6 +125,18 @@ class AdminService {
 
         if ($firstName === '' || $lastName === '' || $department === '' || $position === '') {
             throw new InvalidArgumentException("First name, last name, department, and position are required.");
+        }
+        if (mb_strlen($firstName) > 100) {
+            throw new InvalidArgumentException("First name must be 100 characters or fewer.");
+        }
+        if (mb_strlen($lastName) > 100) {
+            throw new InvalidArgumentException("Last name must be 100 characters or fewer.");
+        }
+        if (mb_strlen($department) > 100) {
+            throw new InvalidArgumentException("Department must be 100 characters or fewer.");
+        }
+        if (mb_strlen($position) > 100) {
+            throw new InvalidArgumentException("Position must be 100 characters or fewer.");
         }
 
         // Check if email already exists
@@ -309,6 +321,15 @@ class AdminService {
         if ($name === '' || $category === '' || $storageLocation === '') {
             throw new InvalidArgumentException("Name, category, and storage location are required.");
         }
+        if (mb_strlen($name) > 150) {
+            throw new InvalidArgumentException("Item name must be 150 characters or fewer.");
+        }
+        if (mb_strlen($category) > 100) {
+            throw new InvalidArgumentException("Category must be 100 characters or fewer.");
+        }
+        if (mb_strlen($storageLocation) > 150) {
+            throw new InvalidArgumentException("Storage location must be 150 characters or fewer.");
+        }
 
         $assetTag = $this->generateNextAssetTag();
 
@@ -405,6 +426,15 @@ class AdminService {
 
         if ($borrowerName === '' || $borrowerContact === '' || $expectedReturnDate === '') {
             throw new InvalidArgumentException("Borrower details and expected return date are required.");
+        }
+        if (mb_strlen($borrowerName) > 150) {
+            throw new InvalidArgumentException("Borrower name must be 150 characters or fewer.");
+        }
+        if (!preg_match('/^(09|\+639)\d{9}$/', $borrowerContact)) {
+            throw new InvalidArgumentException("Please enter a valid Philippine mobile number (e.g. 09397325776).");
+        }
+        if ($remarks !== null && mb_strlen($remarks) > 500) {
+            throw new InvalidArgumentException("Remarks must be 500 characters or fewer.");
         }
 
         if ($quantity <= 0) {

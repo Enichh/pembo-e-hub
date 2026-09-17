@@ -78,8 +78,14 @@ class ComplaintsService
         if ($incidentLocation === '') {
             throw new InvalidArgumentException('Incident location is required.');
         }
+        if (mb_strlen($incidentLocation) > 500) {
+            throw new InvalidArgumentException('Incident location must be 500 characters or fewer.');
+        }
         if ($narrative === '') {
             throw new InvalidArgumentException('Please describe what happened.');
+        }
+        if (mb_strlen($narrative) > 2000) {
+            throw new InvalidArgumentException('Complaint narrative must be 2000 characters or fewer.');
         }
         if ($incidentDate === '') {
             throw new InvalidArgumentException('Incident date is required.');

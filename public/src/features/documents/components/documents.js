@@ -82,7 +82,7 @@ function render(host) {
                 <section class="doc-card">
                     <div class="doc-section-head"><span class="doc-section-num">2</span><h2>Purpose of Request</h2></div>
                     <label class="doc-label" for="doc-purpose">Why do you need this document?</label>
-                    <textarea id="doc-purpose" class="doc-textarea" rows="3" placeholder="e.g. Local employment application"></textarea>
+                    <textarea id="doc-purpose" class="doc-textarea" rows="3" placeholder="e.g. Local employment application" maxlength="500"></textarea>
                 </section>
 
                 <section class="doc-card">
@@ -371,6 +371,10 @@ async function handleCreateRequest(e) {
         toast('error', 'Please enter the purpose of your request.');
         return;
     }
+    if (purpose.length > 500) {
+        toast('error', 'Purpose of request must be 500 characters or fewer.');
+        return;
+    }
     if (!selectedFile) {
         setAttachmentError('Please attach your supporting document / Valid ID.');
         return;
@@ -599,31 +603,35 @@ async function recordPayment(requestId, btn) {
 }
 
 /* ---------- Event delegation (no inline onclick) ---------- */
-document.addEventListener('click', (e) => {
-    const el = e.target.closest('[data-action]');
-    if (!el) return;
-    const action = el.getAttribute('data-action');
-    const id = el.getAttribute('data-id');
-    if (action === 'view-request') viewRequestDetails(id);
-    else if (action === 'close-modal') { const m = document.getElementById('details-modal'); if (m) m.style.display = 'none'; }
-    else if (action === 'update-status') updateStatus(id, el);
-    else if (action === 'record-payment') recordPayment(id, el);
-});
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', (e) => {
+        const el = e.target.closest('[data-action]');
+        if (!el) return;
+        const action = el.getAttribute('data-action');
+        const id = el.getAttribute('data-id');
+        if (action === 'view-request') viewRequestDetails(id);
+        else if (action === 'close-modal') { const m = document.getElementById('details-modal'); if (m) m.style.display = 'none'; }
+        else if (action === 'update-status') updateStatus(id, el);
+        else if (action === 'record-payment') recordPayment(id, el);
+    });
 
-// Close on backdrop click (outside .modal) or Escape.
-document.addEventListener('click', (e) => {
-    const modal = document.getElementById('details-modal');
-    if (!modal || modal.style.display !== 'flex') return;
-    if (e.target === modal) modal.style.display = 'none';
-});
-document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    const modal = document.getElementById('details-modal');
-    if (modal && modal.style.display === 'flex') modal.style.display = 'none';
-});
+    // Close on backdrop click (outside .modal) or Escape.
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('details-modal');
+        if (!modal || modal.style.display !== 'flex') return;
+        if (e.target === modal) modal.style.display = 'none';
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        const modal = document.getElementById('details-modal');
+        if (modal && modal.style.display === 'flex') modal.style.display = 'none';
+    });
+}
 
 export function mount(host) {
     render(host);
     loadDocumentTypes();
     loadRequestsTable();
 }
+
+export { escapeHtml, isViewableImage, attachmentSourceUrl };

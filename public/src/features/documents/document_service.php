@@ -68,6 +68,9 @@ class DocumentService {
         if (empty($purpose)) {
             throw new InvalidArgumentException("Purpose of request is required.");
         }
+        if (mb_strlen($purpose) > 500) {
+            throw new InvalidArgumentException("Purpose of request must be 500 characters or fewer.");
+        }
 
         $stmtType = $this->pdo->prepare("SELECT id, name, base_fee FROM document_types WHERE id = :id AND is_active = 1");
         $stmtType->execute([':id' => $documentTypeId]);

@@ -5,7 +5,7 @@
 
 const assert = require('assert');
 const { escapeHtml, isViewableImage, attachmentSourceUrl } = require(
-    '../src/features/documents/components/documents.js'
+    '../public/src/features/documents/components/documents.js'
 );
 
 let passed = 0;

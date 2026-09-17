@@ -107,19 +107,19 @@ function buildMarkup(profile) {
                 <div class="prof-form-grid">
                     <div class="form-group">
                         <label for="prof-first-name">First name <span style="color:var(--prof-danger)">*</span></label>
-                        <input type="text" id="prof-first-name" class="form-control" value="${escapeHtml(profile.first_name || '')}" required>
+                        <input type="text" id="prof-first-name" class="form-control" value="${escapeHtml(profile.first_name || '')}" maxlength="100" required>
                     </div>
                     <div class="form-group">
                         <label for="prof-last-name">Last name <span style="color:var(--prof-danger)">*</span></label>
-                        <input type="text" id="prof-last-name" class="form-control" value="${escapeHtml(profile.last_name || '')}" required>
+                        <input type="text" id="prof-last-name" class="form-control" value="${escapeHtml(profile.last_name || '')}" maxlength="100" required>
                     </div>
                     <div class="form-group">
                         <label for="prof-middle-name">Middle name</label>
-                        <input type="text" id="prof-middle-name" class="form-control" value="${escapeHtml(profile.middle_name || '')}">
+                        <input type="text" id="prof-middle-name" class="form-control" value="${escapeHtml(profile.middle_name || '')}" maxlength="100">
                     </div>
                     <div class="form-group">
                         <label for="prof-suffix">Suffix</label>
-                        <input type="text" id="prof-suffix" class="form-control" placeholder="e.g. Jr., Sr., III" value="${escapeHtml(profile.suffix || '')}">
+                        <input type="text" id="prof-suffix" class="form-control" placeholder="e.g. Jr., Sr., III" value="${escapeHtml(profile.suffix || '')}" maxlength="20">
                     </div>
                     <div class="form-group">
                         <label for="prof-gender">Gender <span style="color:var(--prof-danger)">*</span></label>
@@ -137,7 +137,8 @@ function buildMarkup(profile) {
                     </div>
                     <div class="form-group">
                         <label for="prof-contact-number">Contact number</label>
-                        <input type="text" id="prof-contact-number" class="form-control" placeholder="e.g. 0917 123 4567" value="${escapeHtml(profile.contact_number || '')}">
+                        <input type="tel" id="prof-contact-number" class="form-control" placeholder="09397325776" inputmode="tel" maxlength="13" value="${escapeHtml(profile.contact_number || '')}" aria-describedby="prof-contact-hint">
+                        <p id="prof-contact-hint" class="field-hint" style="margin-top:4px;font-size:12px;color:var(--prof-muted)">Format: 09XXXXXXXXX (11 digits, e.g. 09397325776)</p>
                     </div>
                     <div class="form-group prof-birthdate-group">
                         <label>Birthdate <span style="color:var(--prof-danger)">*</span></label>
@@ -147,7 +148,7 @@ function buildMarkup(profile) {
                     </div>
                     <div class="form-group full">
                         <label for="prof-street-address">Complete address <span style="color:var(--prof-danger)">*</span></label>
-                        <textarea id="prof-street-address" class="form-control" rows="2" required>${escapeHtml(profile.street_address || '')}</textarea>
+                        <textarea id="prof-street-address" class="form-control" rows="2" maxlength="500" required>${escapeHtml(profile.street_address || '')}</textarea>
                     </div>
                 </div>
                 <div class="prof-actions">
@@ -186,7 +187,9 @@ function clearFieldError(input, hintEl, okText) {
 // Client-side validation mirroring ProfileService::updateResidentProfile.
 function validateProfileForm() {
     const first = document.getElementById('prof-first-name');
+    const middle = document.getElementById('prof-middle-name');
     const last = document.getElementById('prof-last-name');
+    const suffix = document.getElementById('prof-suffix');
     const gender = document.getElementById('prof-gender');
     const civil = document.getElementById('prof-civil-status');
     const address = document.getElementById('prof-street-address');
@@ -197,15 +200,35 @@ function validateProfileForm() {
     if (!first.value.trim()) {
         setFieldError(first, null, 'First name is required.');
         valid = false;
+    } else if (first.value.trim().length > 100) {
+        setFieldError(first, null, 'First name must be 100 characters or fewer.');
+        valid = false;
     } else {
         clearFieldError(first, null);
+    }
+
+    if (middle && middle.value.trim() && middle.value.trim().length > 100) {
+        setFieldError(middle, null, 'Middle name must be 100 characters or fewer.');
+        valid = false;
+    } else if (middle) {
+        clearFieldError(middle, null);
     }
 
     if (!last.value.trim()) {
         setFieldError(last, null, 'Last name is required.');
         valid = false;
+    } else if (last.value.trim().length > 100) {
+        setFieldError(last, null, 'Last name must be 100 characters or fewer.');
+        valid = false;
     } else {
         clearFieldError(last, null);
+    }
+
+    if (suffix && suffix.value.trim() && suffix.value.trim().length > 20) {
+        setFieldError(suffix, null, 'Suffix must be 20 characters or fewer.');
+        valid = false;
+    } else if (suffix) {
+        clearFieldError(suffix, null);
     }
 
     if (!gender.value) {
@@ -225,14 +248,25 @@ function validateProfileForm() {
     if (!address.value.trim()) {
         setFieldError(address, null, 'Complete address is required.');
         valid = false;
+    } else if (address.value.trim().length > 500) {
+        setFieldError(address, null, 'Complete address must be 500 characters or fewer.');
+        valid = false;
     } else {
         clearFieldError(address, null);
     }
 
-    if (contact.value.trim() !== '' && !/^[0-9+\-\s()]{7,20}$/.test(contact.value.trim())) {
-        setFieldError(contact, null, 'Contact number contains invalid characters.');
-        valid = false;
-    } else {
+    const contactVal = contact ? contact.value.trim() : '';
+    if (contactVal !== '') {
+        if (contactVal.length > 13) {
+            setFieldError(contact, null, 'Contact number must be 13 characters or fewer.');
+            valid = false;
+        } else if (!/^(09|\+639)\d{9}$/.test(contactVal)) {
+            setFieldError(contact, null, 'Please enter a valid Philippine mobile number (e.g. 09397325776).');
+            valid = false;
+        } else {
+            clearFieldError(contact, null);
+        }
+    } else if (contact) {
         clearFieldError(contact, null);
     }
 
