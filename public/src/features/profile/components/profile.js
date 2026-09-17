@@ -6,6 +6,7 @@
 
 const GENDERS = ['Male', 'Female', 'Other'];
 const CIVIL_STATUSES = ['Single', 'Married', 'Widowed', 'Separated', 'Divorced'];
+const SUFFIXES = ['', 'Jr.', 'Sr.', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
 
 function escapeHtml(value) {
     return String(value ?? '')
@@ -77,6 +78,11 @@ function optionList(allowlist, selected) {
 function buildMarkup(profile) {
     const genderOptions = optionList(GENDERS, profile.gender);
     const civOptions = optionList(CIVIL_STATUSES, profile.civil_status);
+    const suffixOptions = SUFFIXES.map((s) => {
+        const sel = s === (profile.suffix || '') ? ' selected' : '';
+        const label = s === '' ? 'None' : s;
+        return '<option value="' + escapeHtml(s) + '"' + sel + '>' + escapeHtml(label) + '</option>';
+    }).join('');
 
     const contact = profile.contact_number || '';
     const contactDisplay = contact ? escapeHtml(contact) : '<span class="prof-field-value is-empty">Not provided</span>';
@@ -119,7 +125,9 @@ function buildMarkup(profile) {
                     </div>
                     <div class="form-group">
                         <label for="prof-suffix">Suffix</label>
-                        <input type="text" id="prof-suffix" class="form-control" placeholder="e.g. Jr., Sr., III" value="${escapeHtml(profile.suffix || '')}" maxlength="20">
+                        <select id="prof-suffix" class="form-control">
+                            ${suffixOptions}
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="prof-gender">Gender <span style="color:var(--prof-danger)">*</span></label>
