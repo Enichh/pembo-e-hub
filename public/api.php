@@ -170,6 +170,21 @@ $routeMap = [
     'list_officers'          => ComplaintsController::class,
 ];
 
+if ($action === 'versions') {
+    require_once __DIR__ . '/src/lib/auth_middleware.php';
+    require_once __DIR__ . '/src/lib/versions.php';
+    require_once __DIR__ . '/src/config/database.php';
+    $user = AuthMiddleware::requireAuth();
+    $pdo = Database::getConnection();
+    Response::success("Versions.", [
+        'appointments' => appointmentsVersion($pdo, $user),
+        'complaints'   => complaintsVersion($pdo, $user),
+        'documents'    => documentsVersion($pdo, $user),
+        'emergency'    => emergencyVersion($pdo, $user),
+    ]);
+    exit;
+}
+
 // Dispatch action to controller if registered in route map
 if (isset($routeMap[$action])) {
     $controllerClass = $routeMap[$action];
