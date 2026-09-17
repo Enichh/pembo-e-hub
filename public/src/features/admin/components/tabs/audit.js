@@ -3,11 +3,13 @@
 // modal). Renders into host passed to `mount(host)`. Native ESM.
 
 import { get, escapeHtml } from '../../../../assets/core.js';
+import { useVersionPoll } from '../../../../assets/useVersionPoll.js';
 import { ICONS, friendlyAction, pageMeta, pagerHtml, wirePager, PAGE_SIZE } from '../admin-helpers.js';
 
 let auditTrailLogs = [];
 let auditRows = [];
 let auditLogsPage = 1;
+let pollInstance = null;
 
 /**
  * @param {HTMLElement} host
@@ -46,17 +48,27 @@ export function mount(host) {
         </section>
     `;
 
-    host.querySelector('#btn-refresh-audit').addEventListener('click', loadAuditTrail);
+    host.querySelector('#btn-refresh-audit').addEventListener('click', () => loadAuditLogs(false));
     const actionFilter = host.querySelector('#audit-action-filter');
-    actionFilter.addEventListener('change', loadAuditTrail);
+    actionFilter.addEventListener('change', () => loadAuditLogs(false));
 
-    loadAuditTrail();
+    loadAuditLogs(false);
+
+    if (pollInstance) {
+        pollInstance.stop();
+    }
+    pollInstance = useVersionPoll({
+        url: 'api.php?action=versions',
+        onChange: () => loadAuditLogs(true)
+    });
 }
 
-async function loadAuditTrail() {
+export async function loadAuditLogs(preservePage = false) {
     const container = document.getElementById('audit-table-container');
     if (!container) return;
-    auditLogsPage = 1;
+    if (!preservePage) {
+        auditLogsPage = 1;
+    }
 
     const actionFilter = document.getElementById('audit-action-filter');
     const filterVal = actionFilter ? actionFilter.value : '';
@@ -76,7 +88,10 @@ async function loadAuditTrail() {
     }
 }
 
-function renderAuditTrailPage() {
+// Keep backward compatibility alias
+export const loadAuditTrail = loadAuditLogs;
+
+export function renderAuditTrailPage() {
     const container = document.getElementById('audit-table-container');
     if (!container) return;
 
