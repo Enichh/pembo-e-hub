@@ -336,6 +336,11 @@
     color: #b91c1c;
 }
 
+.apt-slot-badge.badge-passed {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
 .apt-slot.is-selected .apt-slot-badge.badge-available {
     background: rgba(255, 255, 255, 0.25);
     color: #ffffff;

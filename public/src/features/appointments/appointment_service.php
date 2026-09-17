@@ -38,9 +38,10 @@ class AppointmentsService {
 
     /**
      * Get taken/booked appointment slots for a specific date across all residents.
+     * Automatically includes slots that have already passed in time if date is today.
      *
      * @param string $date YYYY-MM-DD
-     * @return string[] List of time slot strings already booked and not cancelled.
+     * @return string[] List of time slot strings already booked or elapsed.
      */
     public function getTakenSlots(string $date): array {
         $stmt = $this->pdo->prepare("
@@ -50,7 +51,27 @@ class AppointmentsService {
               AND status NOT IN ('CANCELLED')
         ");
         $stmt->execute([':date' => $date]);
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $booked = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        $tz = new DateTimeZone('Asia/Manila');
+        $now = new DateTime('now', $tz);
+        $todayYmd = $now->format('Y-m-d');
+
+        if ($date === $todayYmd) {
+            foreach (self::SLOTS as $slot) {
+                $startTimeStr = trim(explode('-', $slot)[0]);
+                $slotStart = DateTime::createFromFormat('Y-m-d H:i', $date . ' ' . $startTimeStr, $tz);
+                if ($slotStart !== false && $slotStart <= $now) {
+                    if (!in_array($slot, $booked, true)) {
+                        $booked[] = $slot;
+                    }
+                }
+            }
+        } elseif ($date < $todayYmd) {
+            return self::SLOTS;
+        }
+
+        return $booked;
     }
 
     private PDO $pdo;
@@ -69,7 +90,7 @@ class AppointmentsService {
      * @param string $date YYYY-MM-DD target appointment date.
      * @param string $timeSlot Scheduled time slot.
      * @return array{id: string, resident_id: string, service_type: string, appointment_date: string, time_slot: string, status: string} Booked appointment payload.
-     * @throws InvalidArgumentException On validation failure or when requested slot is already held.
+     * @throws InvalidArgumentException On validation failure or when requested slot is already held/elapsed.
      */
     public function book(string $residentId, string $serviceType, string $date, string $timeSlot): array {
         $serviceType = trim($serviceType);
@@ -79,13 +100,27 @@ class AppointmentsService {
         if (!in_array($timeSlot, self::SLOTS, true)) {
             throw new InvalidArgumentException('Invalid time slot.');
         }
-        $dateObj = DateTime::createFromFormat('Y-m-d', $date);
+
+        $tz = new DateTimeZone('Asia/Manila');
+        $now = new DateTime('now', $tz);
+        $todayYmd = $now->format('Y-m-d');
+
+        $dateObj = DateTime::createFromFormat('Y-m-d', $date, $tz);
         if ($dateObj === false || $dateObj->format('Y-m-d') !== $date) {
             throw new InvalidArgumentException('Appointment date must be in YYYY-MM-DD format.');
         }
-        $today = new DateTime('today');
-        if ($dateObj < $today) {
+
+        if ($date < $todayYmd) {
             throw new InvalidArgumentException('Appointment date cannot be in the past.');
+        }
+
+        // Validate time slot is not in the past if scheduling for today
+        if ($date === $todayYmd) {
+            $startTimeStr = trim(explode('-', $timeSlot)[0]);
+            $slotStart = DateTime::createFromFormat('Y-m-d H:i', $date . ' ' . $startTimeStr, $tz);
+            if ($slotStart === false || $slotStart <= $now) {
+                throw new InvalidArgumentException('Cannot book a time slot that has already passed for today. Please select an upcoming slot.');
+            }
         }
 
         $id = Uuid::v4();

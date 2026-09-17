@@ -394,23 +394,46 @@ async function loadSlots() {
             }
         }
 
+        const now = today();
+        const nowTime = new Date();
+        const ymdToday = toYmd(now);
+        const isToday = selectedDate === ymdToday;
+
         slots.forEach((slot) => {
             const isTaken = takenSet.has(slot);
+            let isPast = false;
+            if (isToday) {
+                const startTimeStr = slot.split('-')[0].trim();
+                const [h, m] = startTimeStr.split(':').map(Number);
+                const slotTime = new Date();
+                slotTime.setHours(h, m, 0, 0);
+                if (slotTime <= nowTime) {
+                    isPast = true;
+                }
+            } else if (selectedDate < ymdToday) {
+                isPast = true;
+            }
+
+            const isUnavailable = isTaken || isPast;
             const isSelected = selectedSlot === slot;
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'apt-slot'
-                + (isTaken ? ' is-taken' : ' is-available')
+                + (isUnavailable ? ' is-taken' : ' is-available')
+                + (isPast ? ' is-past' : '')
                 + (isSelected ? ' is-selected' : '');
             btn.setAttribute('data-slot', slot);
 
-            if (isTaken) {
+            if (isUnavailable) {
                 btn.disabled = true;
                 btn.setAttribute('aria-disabled', 'true');
-                btn.title = 'This time slot is fully booked for ' + selectedDate;
+                const badgeText = isPast ? 'Passed' : 'Booked';
+                const badgeCls = isPast ? 'badge-passed' : 'badge-taken';
+                const tooltip = isPast ? 'This time slot has already passed for today' : ('This time slot is fully booked for ' + selectedDate);
+                btn.title = tooltip;
                 btn.innerHTML = `
                     <span class="apt-slot-time">${escapeHtml(slot)}</span>
-                    <span class="apt-slot-badge badge-taken">Booked</span>
+                    <span class="apt-slot-badge ${badgeCls}">${badgeText}</span>
                 `;
             } else {
                 btn.title = 'Click to select ' + slot;
