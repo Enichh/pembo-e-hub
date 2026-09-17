@@ -21,4 +21,4 @@ Thumbs.db
 
 # Database dumps (may contain credentials + resident PII)
 *.sql
-﻿
+!pembo_ehub_db.sql
