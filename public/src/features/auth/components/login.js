@@ -84,7 +84,8 @@ function switchTab(tab) {
     if (footnote) {
         footnote.textContent = tab === 'login'
             ? 'New here? Switch to Register to create a resident account.'
-            : 'Registration is instant and free for residents.';
+            : '';
+        footnote.style.display = tab === 'login' ? 'block' : 'none';
     }
 }
 
