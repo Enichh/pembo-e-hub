@@ -665,7 +665,16 @@ class AuthService {
         $stmt->execute([':email' => $email]);
         $user = $stmt->fetch();
 
-        if (!$user || !password_verify($password, $user['password_hash'])) {
+        if (!$user) {
+            $stmtPending = $this->pdo->prepare("SELECT id FROM pending_registrations WHERE email = :email");
+            $stmtPending->execute([':email' => $email]);
+            if ($stmtPending->fetch()) {
+                throw new RuntimeException("Your email has not been verified yet. Please complete email verification using the 6-digit code.");
+            }
+            throw new InvalidArgumentException("Invalid email or password.");
+        }
+
+        if (!password_verify($password, $user['password_hash'])) {
             throw new InvalidArgumentException("Invalid email or password.");
         }
 
