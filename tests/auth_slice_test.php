@@ -37,19 +37,23 @@ class AuthSliceTest {
     public function runAll(): void {
         echo "\n=== Running Auth Test Suite ===\n\n";
 
-        $this->testRolesExist();
-        $this->testUserRegistrationValid();
-        $this->testUserRegistrationInvalidEmail();
-        $this->testUserRegistrationShortPassword();
-        $this->testUserRegistrationDuplicateEmail();
-        $this->testPasswordResetFlow();
-        $this->testPasswordResetUnknownEmail();
-        $this->testUserLoginSuccess();
-        $this->testUserLoginInvalidPassword();
-        $this->testCsrfTokenValidation();
-        $this->testRbacAuthorization();
-        $this->testAuditLogImmutability();
-        $this->testPendingVerificationLoginGate();
+        try {
+            $this->testRolesExist();
+            $this->testUserRegistrationValid();
+            $this->testUserRegistrationInvalidEmail();
+            $this->testUserRegistrationShortPassword();
+            $this->testUserRegistrationDuplicateEmail();
+            $this->testPasswordResetFlow();
+            $this->testPasswordResetUnknownEmail();
+            $this->testUserLoginSuccess();
+            $this->testUserLoginInvalidPassword();
+            $this->testCsrfTokenValidation();
+            $this->testRbacAuthorization();
+            $this->testAuditLogImmutability();
+            $this->testPendingVerificationLoginGate();
+        } finally {
+            $this->tearDown();
+        }
 
         echo "\n=======================================================\n";
         echo "TEST SUMMARY: {$this->passed} Passed, {$this->failed} Failed\n";
@@ -57,6 +61,37 @@ class AuthSliceTest {
 
         if ($this->failed > 0) {
             exit(1);
+        }
+    }
+
+    private function tearDown(): void {
+        try {
+            $this->pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
+            $testEmails = [
+                'resident_%',
+                'pending_gate_%',
+                'duplicate_%',
+                'pwreset_%',
+                'nonexistent_%',
+                'bad_%'
+            ];
+            foreach ($testEmails as $pattern) {
+                $stmt = $this->pdo->prepare("SELECT id FROM users WHERE email LIKE :p");
+                $stmt->execute([':p' => $pattern]);
+                $uids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+                foreach ($uids as $uid) {
+                    $this->pdo->exec("DELETE FROM resident_profiles WHERE user_id = '{$uid}'");
+                    $this->pdo->exec("DELETE FROM staff_profiles WHERE user_id = '{$uid}'");
+                    $this->pdo->exec("DELETE FROM user_sessions WHERE user_id = '{$uid}'");
+                    $this->pdo->exec("DELETE FROM refresh_tokens WHERE user_id = '{$uid}'");
+                    $this->pdo->exec("DELETE FROM users WHERE id = '{$uid}'");
+                }
+                $this->pdo->prepare("DELETE FROM pending_registrations WHERE email LIKE :p")->execute([':p' => $pattern]);
+                $this->pdo->prepare("DELETE FROM password_resets WHERE email LIKE :p")->execute([':p' => $pattern]);
+            }
+            $this->pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
+        } catch (Throwable $e) {
+            // silent cleanup failure
         }
     }
 
