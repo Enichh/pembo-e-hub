@@ -3,10 +3,16 @@
 // booking flow (service, date, time slot) into a host passed to `mount(host)`,
 // and wires events via delegation.
 
+import { useVersionPoll } from '../../../assets/useVersionPoll.js';
+
 let selectedSlot = '';
 let selectedService = '';
 let selectedDate = '';            // YYYY-MM-DD
 let calendarView = null;           // { year, month } 0-based month
+
+const uiState = { modalOpen: false, formDirty: false, uploadInProgress: false };
+let refreshPending = false;
+let pollInstance = null;
 
 function csrf() {
     return window.pemboCsrfToken || '';
@@ -62,6 +68,51 @@ const ICONS = {
     chevR: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
 };
 
+function showUpdatesBadge() {
+    const container = document.getElementById('apt-updates-badge-container');
+    if (!container) return;
+    container.innerHTML = `<button type="button" class="updates-badge" id="apt-updates-badge" aria-label="Refresh appointments">● New updates available — click to refresh</button>`;
+    const btn = document.getElementById('apt-updates-badge');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            refreshPending = false;
+            hideUpdatesBadge();
+            refreshAppointmentsTable();
+        });
+    }
+}
+
+function hideUpdatesBadge() {
+    const container = document.getElementById('apt-updates-badge-container');
+    if (container) {
+        container.innerHTML = '';
+    }
+}
+
+function checkDeferredRefresh() {
+    if (!uiState.modalOpen && !uiState.formDirty && !uiState.uploadInProgress) {
+        if (refreshPending) {
+            refreshPending = false;
+            hideUpdatesBadge();
+            refreshAppointmentsTable();
+        }
+    }
+}
+
+function handleAppointmentsChange() {
+    if (uiState.modalOpen || uiState.formDirty || uiState.uploadInProgress) {
+        refreshPending = true;
+        showUpdatesBadge();
+        return;
+    }
+    refreshAppointmentsTable();
+}
+
+async function refreshAppointmentsTable() {
+    await loadAppointmentsTable();
+    await markTakenSlots();
+}
+
 function render(host) {
     host.innerHTML = `
         <div class="apt">
@@ -96,7 +147,10 @@ function render(host) {
             </form>
 
             <section class="apt-card">
-                <div class="apt-section-head"><h2>My Appointments</h2></div>
+                <div class="apt-section-head" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <h2>My Appointments</h2>
+                    <div id="apt-updates-badge-container"></div>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -140,6 +194,7 @@ function wireForm() {
             const radio = e.target.closest('input[name="apt-service"]');
             if (!radio) return;
             selectedService = radio.value;
+            uiState.formDirty = true;
             grid.querySelectorAll('.apt-service-card').forEach((c) => {
                 c.classList.toggle('is-selected', c.dataset.value === radio.value);
             });
@@ -148,7 +203,13 @@ function wireForm() {
         });
     }
 
-    if (form) form.addEventListener('submit', handleBook);
+    if (form) {
+        form.addEventListener('submit', handleBook);
+        form.addEventListener('reset', () => {
+            uiState.formDirty = false;
+            checkDeferredRefresh();
+        });
+    }
 }
 
 /* ---------- Custom calendar (framework-free, accessible) ---------- */
@@ -301,11 +362,12 @@ async function loadSlots() {
         slots.forEach((slot) => {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'apt-slot';
+            btn.className = 'apt-slot' + (selectedSlot === slot ? ' is-selected' : '');
             btn.setAttribute('data-slot', slot);
             btn.textContent = slot;
             btn.addEventListener('click', () => {
                 selectedSlot = slot;
+                uiState.formDirty = true;
                 box.querySelectorAll('.apt-slot').forEach((b) => b.classList.remove('is-selected'));
                 btn.classList.add('is-selected');
                 const hint = document.getElementById('apt-slot-hint');
@@ -333,6 +395,9 @@ async function markTakenSlots() {
             const isTaken = taken.has(slot);
             b.disabled = isTaken;
             b.title = isTaken ? 'Already booked on this date' : '';
+            if (selectedSlot === slot) {
+                b.classList.add('is-selected');
+            }
         });
     } catch (e) {
         /* non-fatal; slots remain selectable */
@@ -402,6 +467,7 @@ async function handleBook(e) {
             selectedSlot = '';
             selectedService = '';
             selectedDate = '';
+            uiState.formDirty = false;
             const grid = document.getElementById('apt-service-grid');
             if (grid) grid.querySelectorAll('.apt-service-card').forEach((c) => c.classList.remove('is-selected'));
             const box = document.getElementById('appointment-slots');
@@ -413,6 +479,7 @@ async function handleBook(e) {
             renderCalendar();
             loadSlots();
             loadAppointmentsTable();
+            checkDeferredRefresh();
         } else {
             toast('error', data.message || 'Failed to book appointment.');
         }
@@ -427,4 +494,12 @@ export function mount(host) {
     render(host);
     loadSlots();
     loadAppointmentsTable();
+
+    if (pollInstance) {
+        pollInstance.stop();
+    }
+    pollInstance = useVersionPoll({
+        url: 'api.php?action=versions',
+        onChange: handleAppointmentsChange
+    });
 }

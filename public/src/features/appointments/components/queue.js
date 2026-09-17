@@ -11,6 +11,7 @@ import {
     escapeHtml, get, post, pill, optionTags, debounce, renderPager,
     fmtDate, fmtDateTime, APT_CLS,
 } from '../../../assets/core.js';
+import { useVersionPoll } from '../../../assets/useVersionPoll.js';
 
 let aptPage = 1;
 let aptMeta = null;
@@ -21,6 +22,10 @@ let aptView = 'list';              // 'list' | 'calendar'
 let aptCalDate = '';               // YYYY-MM-DD selected in the calendar
 let aptCalMonth = null;            // { year, month } 0-based month
 let aptAll = [];                   // every appointment (staff sees all)
+
+const uiState = { modalOpen: false, formDirty: false, uploadInProgress: false };
+let refreshPending = false;
+let pollInstance = null;
 
 const APT_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const APT_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -47,6 +52,57 @@ function toast(type, message, opts) {
     else alert(message);
 }
 
+function showUpdatesBadge() {
+    const container = document.getElementById('queue-apt-updates-badge-container');
+    if (!container) return;
+    container.innerHTML = `<button type="button" class="updates-badge" id="queue-apt-updates-badge" aria-label="Refresh appointments">● New updates available — click to refresh</button>`;
+    const btn = document.getElementById('queue-apt-updates-badge');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            refreshPending = false;
+            hideUpdatesBadge();
+            reloadAppointmentQueue();
+        });
+    }
+}
+
+function hideUpdatesBadge() {
+    const container = document.getElementById('queue-apt-updates-badge-container');
+    if (container) container.innerHTML = '';
+}
+
+function checkDeferredRefresh() {
+    if (!uiState.modalOpen && !uiState.formDirty && !uiState.uploadInProgress) {
+        if (refreshPending) {
+            refreshPending = false;
+            hideUpdatesBadge();
+            reloadAppointmentQueue();
+        }
+    }
+}
+
+function checkReasonInputsDirty() {
+    const reasons = document.querySelectorAll('.queue-apt-reason');
+    let hasText = false;
+    for (const input of reasons) {
+        if (input.value && input.value.trim() !== '') {
+            hasText = true;
+            break;
+        }
+    }
+    uiState.formDirty = hasText;
+}
+
+function handleQueueChange() {
+    checkReasonInputsDirty();
+    if (uiState.modalOpen || uiState.formDirty || uiState.uploadInProgress) {
+        refreshPending = true;
+        showUpdatesBadge();
+        return;
+    }
+    reloadAppointmentQueue();
+}
+
 /** Wrap modal markup; the outer node is the click-catch backdrop. */
 function modalFrame(inner) {
     return '<div class="queue-modal-backdrop" data-close-scope="true"><div class="queue-modal" role="dialog" aria-modal="true">' + inner + '</div></div>';
@@ -55,6 +111,8 @@ function modalFrame(inner) {
 function closeModal() {
     const m = document.getElementById('queue-apt-modal');
     if (m) { m.style.display = 'none'; m.innerHTML = ''; }
+    uiState.modalOpen = false;
+    checkDeferredRefresh();
 }
 
 function openModal(backdrop) {
@@ -62,6 +120,7 @@ function openModal(backdrop) {
     if (outer) outer.style.display = ''; // undo prior inline 'none' so it can reopen
     backdrop.setAttribute('aria-hidden', 'false');
     backdrop.style.display = 'flex';
+    uiState.modalOpen = true;
 }
 
 async function loadAppointments(page, qs) {
@@ -149,10 +208,9 @@ function renderCalendarGrid() {
         const now = new Date();
         aptCalMonth = { year: now.getFullYear(), month: now.getMonth() };
     }
-
     const { year, month } = aptCalMonth;
+    const ymdToday = aptTodayYmd();
     const counts = aptCounts();
-    const todayYmd = aptTodayYmd();
 
     const first = new Date(year, month, 1);
     const startOffset = first.getDay();
@@ -161,91 +219,104 @@ function renderCalendarGrid() {
     const head = APT_WEEKDAYS.map((w) => '<span class="apt-cal-dow">' + w + '</span>').join('');
 
     let cells = '';
-    for (let i = 0; i < startOffset; i++) cells += '<span class="apt-cal-cell apt-cal-empty"></span>';
+    for (let i = 0; i < startOffset; i++) {
+        cells += '<span class="apt-cal-cell apt-cal-empty"></span>';
+    }
 
     for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month, d);
         const ymd = aptToYmd(date);
-        const count = counts[ymd] || 0;
-        const isToday = ymd === todayYmd;
+        const isToday = ymd === ymdToday;
         const isSelected = ymd === aptCalDate;
+        const count = counts[ymd] || 0;
 
         let cls = 'apt-cal-cell apt-cal-day';
-        if (count > 0) cls += ' has-count';
         if (isToday) cls += ' is-today';
         if (isSelected) cls += ' is-selected';
 
-        const badge = count > 0 ? '<span class="apt-cal-badge">' + count + '</span>' : '';
+        const badge = count > 0
+            ? '<span class="queue-cal-badge" aria-label="' + count + ' appointments">' + count + '</span>'
+            : '';
+
         cells += '<button type="button" class="' + cls + '" data-ymd="' + ymd + '"'
-            + ' aria-label="' + d + (count ? ', ' + count + ' appointment(s)' : '') + '">'
+            + ' aria-label="' + d + ' (' + count + ' appointments)">'
             + d + badge + '</button>';
     }
 
-    const remainder = (startOffset + daysInMonth) % 7;
+    const total = startOffset + daysInMonth;
+    const remainder = total % 7;
     if (remainder !== 0) {
-        for (let i = remainder; i < 7; i++) cells += '<span class="apt-cal-cell apt-cal-empty"></span>';
+        for (let i = remainder; i < 7; i++) {
+            cells += '<span class="apt-cal-cell apt-cal-empty"></span>';
+        }
     }
 
     host.innerHTML = `
         <div class="apt-cal-head">
-            <button type="button" class="apt-cal-nav" data-action="cal-prev" aria-label="Previous month">&lt;</button>
+            <button type="button" class="apt-cal-nav" id="queue-cal-prev" aria-label="Previous month">${chevronLeft()}</button>
             <div class="apt-cal-title">${APT_MONTHS[month]} ${year}</div>
-            <button type="button" class="apt-cal-nav" data-action="cal-next" aria-label="Next month">&gt;</button>
+            <button type="button" class="apt-cal-nav" id="queue-cal-next" aria-label="Next month">${chevronRight()}</button>
         </div>
-        <div class="apt-cal-grid">${head}${cells}</div>
+        <div class="apt-cal-grid">
+            ${head}
+            ${cells}
+        </div>
     `;
 
-    renderCalendarDay();
+    renderCalendarSideList();
 }
 
-function renderCalendarDay() {
-    const list = document.getElementById('queue-apt-cal-list');
+function renderCalendarSideList() {
     const hint = document.getElementById('queue-apt-cal-hint');
+    const list = document.getElementById('queue-apt-cal-list');
     if (!list) return;
 
-    const date = aptCalDate || aptTodayYmd();
-    if (hint) {
-        const pretty = new Date(date + 'T00:00:00').toLocaleDateString('en-PH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        hint.textContent = 'Showing ' + pretty;
-    }
+    const pretty = new Date(aptCalDate + 'T00:00:00').toLocaleDateString('en-PH', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    });
+    if (hint) hint.textContent = 'Appointments for ' + pretty;
 
-    const dayAppts = aptAll
-        .filter((a) => String(a.appointment_date || '').slice(0, 10) === date)
-        .sort((a, b) => String(a.time_slot).localeCompare(String(b.time_slot)));
-
-    if (!dayAppts.length) {
+    const rows = aptAll.filter((a) => String(a.appointment_date || '').slice(0, 10) === aptCalDate);
+    if (!rows.length) {
         list.innerHTML = '<div class="queue-state">No appointments on this date.</div>';
         return;
     }
-
-    list.innerHTML = dayAppts.map((a) => aptCard(a)).join('');
+    list.innerHTML = rows.map(aptCard).join('');
 }
 
 function wireCalendar() {
-    const host = document.getElementById('queue-apt-calendar');
-    if (!host) return;
-    host.addEventListener('click', (e) => {
-        // Day cells carry `data-ymd` (no `data-action`), so handle them first.
-        const day = e.target.closest('.apt-cal-day');
-        if (day) {
-            aptCalDate = day.getAttribute('data-ymd');
-            renderCalendarGrid();
-            return;
-        }
+    const wrap = document.getElementById('queue-apt-calendar-wrap');
+    if (!wrap) return;
 
-        const action = e.target.closest('[data-action]');
-        if (!action) return;
-        const act = action.getAttribute('data-action');
-        if (act === 'cal-prev') {
+    wrap.addEventListener('click', (e) => {
+        const prev = e.target.closest('#queue-cal-prev');
+        if (prev) {
             aptCalMonth.month--;
             if (aptCalMonth.month < 0) { aptCalMonth.month = 11; aptCalMonth.year--; }
             renderCalendarGrid();
-        } else if (act === 'cal-next') {
+            return;
+        }
+        const next = e.target.closest('#queue-cal-next');
+        if (next) {
             aptCalMonth.month++;
             if (aptCalMonth.month > 11) { aptCalMonth.month = 0; aptCalMonth.year++; }
             renderCalendarGrid();
+            return;
+        }
+        const dayBtn = e.target.closest('.apt-cal-day');
+        if (dayBtn) {
+            aptCalDate = dayBtn.getAttribute('data-ymd');
+            renderCalendarGrid();
         }
     });
+}
+
+function chevronLeft() {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+}
+
+function chevronRight() {
+    return '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
 }
 
 function aptDetailModal(a) {
@@ -284,7 +355,10 @@ async function updateAppointment(aid, status, reason, btn) {
         if (d.success) toast('success', 'Appointment status updated.');
         else toast('error', d.message || 'Update failed.');
     } catch (e) { toast('error', 'Network error.'); }
-    finally { reloadAppointmentQueue(); }
+    finally {
+        checkReasonInputsDirty();
+        reloadAppointmentQueue();
+    }
 }
 
 function reloadAppointmentQueue() {
@@ -339,7 +413,6 @@ function scrollToCardAndUpdate(aid) {
 
 /** Open the read-only detail modal for a resident appointment. */
 async function openDetail(aid) {
-    // Re-fetch the specific row from the currently loaded page to keep it simple.
     const dEl = document.getElementById('queue-apt-q');
     const detailQuery = { q: dEl ? dEl.value : '', status: '', date: '' };
     try {
@@ -370,7 +443,7 @@ export function mount(host) {
                 <span class="queue-role-badge">STAFF</span>
             </div>
             <div class="queue-toolbar">
-                <div class="queue-toolbar-left">
+                <div class="queue-toolbar-left" style="display:flex; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div class="queue-search">
                         <span class="queue-search-ico" aria-hidden="true">⌕</span>
                         <input type="text" id="queue-apt-q" class="form-control" placeholder="Search by service, resident, or time slot">
@@ -378,6 +451,7 @@ export function mount(host) {
                     <select id="queue-apt-status" class="form-control queue-filter-select" aria-label="Filter by status">
                         <option value="">All statuses</option>${optionTags(APT_STATUS_OPTS.map((s) => ({ value: s, label: s.replace(/_/g, ' ') })))}
                     </select>
+                    <div id="queue-apt-updates-badge-container"></div>
                 </div>
                 <div class="queue-toolbar-right">
                     <button type="button" class="btn btn-secondary" data-action="apt-view-toggle" data-view="calendar">Calendar</button>
@@ -406,9 +480,27 @@ export function mount(host) {
     host.querySelectorAll('[data-action="apt-view-toggle"]').forEach((b) => {
         b.addEventListener('click', () => setView(b.getAttribute('data-view')));
     });
+
+    host.addEventListener('input', (e) => {
+        if (e.target && e.target.classList.contains('queue-apt-reason')) {
+            checkReasonInputsDirty();
+            if (!uiState.formDirty) {
+                checkDeferredRefresh();
+            }
+        }
+    });
+
     wireActions();
     wireCalendar();
     go(1);
+
+    if (pollInstance) {
+        pollInstance.stop();
+    }
+    pollInstance = useVersionPoll({
+        url: 'api.php?action=versions',
+        onChange: handleQueueChange
+    });
 }
 
 function setView(view) {
