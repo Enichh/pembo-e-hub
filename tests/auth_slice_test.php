@@ -82,8 +82,6 @@ class AuthSliceTest {
                 foreach ($uids as $uid) {
                     $this->pdo->exec("DELETE FROM resident_profiles WHERE user_id = '{$uid}'");
                     $this->pdo->exec("DELETE FROM staff_profiles WHERE user_id = '{$uid}'");
-                    $this->pdo->exec("DELETE FROM user_sessions WHERE user_id = '{$uid}'");
-                    $this->pdo->exec("DELETE FROM refresh_tokens WHERE user_id = '{$uid}'");
                     $this->pdo->exec("DELETE FROM users WHERE id = '{$uid}'");
                 }
                 $this->pdo->prepare("DELETE FROM pending_registrations WHERE email LIKE :p")->execute([':p' => $pattern]);
