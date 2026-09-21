@@ -24,7 +24,7 @@ export function mount(host) {
             </div>
 
             <div class="admin-filter-bar">
-                <input type="text" id="assets-search-input" class="form-control admin-search-input" placeholder="Search by item name, tag, category, or storage location...">
+                <input type="text" id="assets-search-input" class="form-control admin-search-input" placeholder="Search by item name, tag, category, or storage location..." maxlength="100">
             </div>
 
             <div id="assets-table-container" class="admin-table-wrap">
@@ -249,6 +249,13 @@ function openIssueAssetModal(assetId, assetName) {
         </div>
     `;
     document.body.appendChild(modal);
+
+    if (window.PemboInputValidator) {
+        const borrowerEl = modal.querySelector('#issue-borrower');
+        const contactEl = modal.querySelector('#issue-contact');
+        if (borrowerEl) window.PemboInputValidator.attachNameFilter(borrowerEl);
+        if (contactEl) window.PemboInputValidator.attachPhoneFilter(contactEl);
+    }
 
     const closeModal = () => modal.remove();
     modal.querySelector('.admin-modal-close').addEventListener('click', closeModal);

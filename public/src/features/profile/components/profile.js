@@ -302,6 +302,15 @@ function wireForm(original) {
     const cancel = document.getElementById('prof-cancel');
     if (!form) return;
 
+    if (window.PemboInputValidator) {
+        ['prof-first-name', 'prof-last-name', 'prof-middle-name'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) window.PemboInputValidator.attachNameFilter(el);
+        });
+        const contactEl = document.getElementById('prof-contact-number');
+        if (contactEl) window.PemboInputValidator.attachPhoneFilter(contactEl);
+    }
+
     // Mount the birthdate calendar (collapsible) with the current value preselected.
     if (window.PemboBirthdateCalendar) {
         window.PemboBirthdateCalendar.mount({

@@ -180,9 +180,13 @@ function buildCodePhase(body) {
         const input = document.createElement('input');
         input.type = 'text';
         input.inputMode = 'numeric';
+        input.pattern = '[0-9]*';
         input.maxLength = 1;
         input.className = 'reset-pin-input';
         input.setAttribute('aria-label', 'Digit ' + (i + 1));
+        if (i === 0) {
+            input.autocomplete = 'one-time-code';
+        }
         inputs.push(input);
         row.appendChild(input);
     }
@@ -274,6 +278,7 @@ function makePasswordField(id, labelText, placeholder) {
     input.className = 'field';
     input.autocomplete = 'new-password';
     input.placeholder = placeholder;
+    input.maxLength = 128;
 
     const toggle = document.createElement('button');
     toggle.type = 'button';

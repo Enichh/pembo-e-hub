@@ -62,7 +62,18 @@
         /** @type {HTMLInputElement[]} */
         const inputs = [];
         for (let i = 0; i < 6; i++) {
-            const input = el('input', { class: 'verify-pin-input', type: 'text', inputmode: 'numeric', 'maxlength': '1', 'aria-label': 'Digit ' + (i + 1) });
+            const attrs = {
+                class: 'verify-pin-input',
+                type: 'text',
+                inputmode: 'numeric',
+                pattern: '[0-9]*',
+                maxlength: '1',
+                'aria-label': 'Digit ' + (i + 1),
+            };
+            if (i === 0) {
+                attrs.autocomplete = 'one-time-code';
+            }
+            const input = el('input', attrs);
             inputs.push(/** @type {HTMLInputElement} */ (input));
             row.appendChild(input);
         }

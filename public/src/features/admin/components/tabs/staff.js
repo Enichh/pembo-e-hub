@@ -26,7 +26,7 @@ export function mount(host) {
             </div>
 
             <div class="admin-filter-bar">
-                <input type="text" id="staff-search-input" class="form-control admin-search-input" placeholder="Search by name, email, or department...">
+                <input type="text" id="staff-search-input" class="form-control admin-search-input" placeholder="Search by name, email, or department..." maxlength="100">
             </div>
 
             <div id="staff-table-container" class="admin-table-wrap">
@@ -176,7 +176,7 @@ function openCreateStaffModal() {
                     </div>
                     <div class="form-group">
                         <label for="prov-password">Initial Password * (min 8 characters)</label>
-                        <input type="password" id="prov-password" class="form-control" required minlength="8">
+                        <input type="password" id="prov-password" class="form-control" required minlength="8" maxlength="128">
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                         <div class="form-group">
@@ -197,6 +197,13 @@ function openCreateStaffModal() {
         </div>
     `;
     document.body.appendChild(modal);
+
+    if (window.PemboInputValidator) {
+        const fn = modal.querySelector('#prov-first-name');
+        const ln = modal.querySelector('#prov-last-name');
+        if (fn) window.PemboInputValidator.attachNameFilter(fn);
+        if (ln) window.PemboInputValidator.attachNameFilter(ln);
+    }
 
     const closeModal = () => modal.remove();
     modal.querySelector('.admin-modal-close').addEventListener('click', closeModal);

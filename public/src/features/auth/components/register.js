@@ -658,6 +658,13 @@ document.addEventListener('DOMContentLoaded', () => {
     wireLiveValidation();
     wireValidIdDropzone();
     renderBirthdateCalendar();
+
+    if (window.PemboInputValidator) {
+        ['reg-first-name', 'reg-middle-name', 'reg-last-name'].forEach((id) => {
+            const el = document.getElementById(id);
+            if (el) window.PemboInputValidator.attachNameFilter(el);
+        });
+    }
 });
 
 })();
