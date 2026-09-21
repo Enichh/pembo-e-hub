@@ -6,6 +6,7 @@
     <title>Sign In | Pembo e-Hub</title>
     <link rel="icon" type="image/png" href="src/assets/pembologo.png">
     <script src="src/assets/theme.js"></script>
+    <script src="src/assets/input_validator.js"></script>
     <link rel="stylesheet" href="src/assets/base.css">
     <link rel="stylesheet" href="src/assets/layout.css">
     <link rel="stylesheet" href="src/assets/components.css">
@@ -42,15 +43,15 @@
                     <div class="form-group">
                         <label for="login-email">Email address</label>
                         <input type="email" id="login-email" class="field" autocomplete="email"
-                               placeholder="name@pembo.gov.ph" inputmode="email" maxlength="254"
-                               aria-describedby="login-email-hint">
+                                placeholder="name@pembo.gov.ph" inputmode="email" maxlength="254"
+                                aria-describedby="login-email-hint">
                         <p id="login-email-hint" class="field-hint">Enter a valid email address.</p>
                     </div>
                     <div class="form-group">
                         <label for="login-password">Password</label>
                         <div class="password-wrap">
                             <input type="password" id="login-password" class="field" autocomplete="current-password"
-                                   placeholder="Your password">
+                                   placeholder="Your password" maxlength="128">
                             <button type="button" class="password-toggle" data-toggle="login-password" aria-label="Show password">
                                 <svg class="icon-eye" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
                                 <svg class="icon-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.74 9.74 0 0 0 5.39-1.61"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -116,7 +117,7 @@
                             <label for="reg-password">Password <span class="req">*</span></label>
                             <div class="password-wrap">
                                 <input type="password" id="reg-password" class="field" autocomplete="new-password"
-                                       placeholder="Create a password" aria-describedby="reg-password-hint">
+                                       placeholder="Create a password" maxlength="128" aria-describedby="reg-password-hint">
                                 <button type="button" class="password-toggle" data-toggle="reg-password" aria-label="Show password">
                                     <svg class="icon-eye" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
                                     <svg class="icon-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 11 8 11 8a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.74 9.74 0 0 0 5.39-1.61"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -130,7 +131,7 @@
                             <label for="reg-confirm-password">Confirm password <span class="req">*</span></label>
                             <div class="password-wrap">
                                 <input type="password" id="reg-confirm-password" class="field" autocomplete="new-password"
-                                       placeholder="Re-type password" aria-describedby="reg-confirm-password-hint">
+                                       placeholder="Re-type password" maxlength="128" aria-describedby="reg-confirm-password-hint">
                                 <button type="button" class="password-toggle" data-toggle="reg-confirm-password" aria-label="Show password">
                                     <svg class="icon-eye" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
                                     <svg class="icon-eye-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M6.61 6.61A13.526 13.526 0 0 0 1 12s4 8 11 8a9.74 9.74 0 0 0 5.39-1.61"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
