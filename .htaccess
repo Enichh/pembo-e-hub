@@ -73,7 +73,7 @@ Options -Indexes
 # ----------------------------------------------------------------------
 # 3. Files to deny outright regardless of rewrite (defense in depth).
 # ----------------------------------------------------------------------
-<FilesMatch "(^\.|\.(env|sql|md|log|ini|sh|dist)$)">
+<FilesMatch "(^\.|\.(env|sql|md|log|ini|sh|dist|txt)$)">
     Require all denied
 </FilesMatch>
 

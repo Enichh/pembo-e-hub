@@ -1,0 +1,7 @@
+# Deny all direct web access to uploaded files and attachments
+# All files must be served securely through authenticated API endpoints with IDOR validation.
+Require all denied
+Options -Indexes -ExecCGI
+<FilesMatch ".*">
+    Require all denied
+</FilesMatch>
