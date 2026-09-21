@@ -114,8 +114,8 @@ class AdminService {
             throw new InvalidArgumentException("Please provide a valid email address.");
         }
 
-        if (strlen($password) < 8) {
-            throw new InvalidArgumentException("Password must be at least 8 characters long.");
+        if (strlen($password) < 8 || mb_strlen($password, 'UTF-8') > 128) {
+            throw new InvalidArgumentException("Password must be between 8 and 128 characters long.");
         }
 
         $firstName = trim($firstName);
@@ -129,8 +129,14 @@ class AdminService {
         if (mb_strlen($firstName) > 100) {
             throw new InvalidArgumentException("First name must be 100 characters or fewer.");
         }
+        if (!preg_match('/^[a-zA-ZñÑ\s\.\'\-]+$/u', $firstName)) {
+            throw new InvalidArgumentException("First name contains invalid characters.");
+        }
         if (mb_strlen($lastName) > 100) {
             throw new InvalidArgumentException("Last name must be 100 characters or fewer.");
+        }
+        if (!preg_match('/^[a-zA-ZñÑ\s\.\'\-]+$/u', $lastName)) {
+            throw new InvalidArgumentException("Last name contains invalid characters.");
         }
         if (mb_strlen($department) > 100) {
             throw new InvalidArgumentException("Department must be 100 characters or fewer.");

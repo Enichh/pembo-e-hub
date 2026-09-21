@@ -88,17 +88,33 @@ class ProfileService
         if (mb_strlen($firstName) > 100) {
             throw new InvalidArgumentException('First name must be 100 characters or fewer.');
         }
+        if (!preg_match('/^[a-zA-ZñÑ\s\.\'\-]+$/u', $firstName)) {
+            throw new InvalidArgumentException('First name contains invalid characters.');
+        }
         if ($lastName === '') {
             throw new InvalidArgumentException('Last name is required.');
         }
         if (mb_strlen($lastName) > 100) {
             throw new InvalidArgumentException('Last name must be 100 characters or fewer.');
         }
-        if ($middleName !== '' && mb_strlen($middleName) > 100) {
-            throw new InvalidArgumentException('Middle name must be 100 characters or fewer.');
+        if (!preg_match('/^[a-zA-ZñÑ\s\.\'\-]+$/u', $lastName)) {
+            throw new InvalidArgumentException('Last name contains invalid characters.');
         }
-        if ($suffix !== '' && mb_strlen($suffix) > 20) {
-            throw new InvalidArgumentException('Suffix must be 20 characters or fewer.');
+        if ($middleName !== '') {
+            if (mb_strlen($middleName) > 100) {
+                throw new InvalidArgumentException('Middle name must be 100 characters or fewer.');
+            }
+            if (!preg_match('/^[a-zA-ZñÑ\s\.\'\-]+$/u', $middleName)) {
+                throw new InvalidArgumentException('Middle name contains invalid characters.');
+            }
+        }
+        if ($suffix !== '') {
+            if (mb_strlen($suffix) > 20) {
+                throw new InvalidArgumentException('Suffix must be 20 characters or fewer.');
+            }
+            if (!preg_match('/^[a-zA-ZñÑ\s\.\'\-]+$/u', $suffix)) {
+                throw new InvalidArgumentException('Suffix contains invalid characters.');
+            }
         }
         if ($birthdate === '') {
             throw new InvalidArgumentException('Birthdate is required.');
